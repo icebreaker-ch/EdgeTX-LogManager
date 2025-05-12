@@ -112,7 +112,7 @@ end
 
 local function updateGui()
     lcd.clear()
-    lcd.drawText(1, 0, "Clean Log Files", INVERS)
+    lcd.drawText(1, 0, "LogCleaner", INVERS)
 
     if state == STATE_DONE then
         lcd.drawText(1,20, "Purged " .. deletedFiles .. " files")
