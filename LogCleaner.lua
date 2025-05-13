@@ -1,5 +1,3 @@
-#!/usr/bin/env lua
-
 local LOG_DIR = "/LOGS"
 local ACTION_KEEP_LATEST_DATE = 0
 local ACTION_KEEP_LATEST_LOG = 1
@@ -10,8 +8,49 @@ local STATE_SELECTING = 1
 local STATE_EXECUTING = 2
 local STATE_DONE = 3
 
-local menu_items = { "Keep latest date", "Keep latest log", "Delete all" }
-local action = 1
+local textWidth
+local textHeight
+
+Selection = { values = {}, current = 0, STATE_IDLE = 0, STATE_SELECTED = 1, STATE_EDITING = 2}
+Selection.__index = Selection
+
+function Selection.new(values, current)
+    local self = setmetatable({}, Selection)
+    self.current = current
+    self.values = values
+    self.state = self.STATE_IDLE
+    return self
+end
+
+function Selection:setState(newState)
+    self.state = newState
+end
+
+function Selection:getState()
+    return self.state
+end
+
+function Selection:getIndex()
+    return self.current
+end
+
+function Selection:getValue()
+    return self.values[self.current]
+end
+
+function Selection:incValue()
+    if self.current < #self.values then
+        self.current = self.current + 1
+    end
+end
+
+function Selection:decValue()
+    if self.current > 1 then
+        self.current = self.current - 1
+    end
+end
+
+local actionSelector = Selection.new({"Keep latest date", "Keep latest log", "Delete all" }, 1)
 
 local state = STATE_START
 local deletedFiles = 0
@@ -110,46 +149,45 @@ local function cleanLogs(action)
     return deleteCount
 end
 
+local function newLine(y, n)
+    local lines = n or 1
+    return y + lines * (textHeight + 1)
+end
+
 local function updateGui()
     lcd.clear()
-    lcd.drawText(1, 0, "LogCleaner", INVERS)
+    local y = 0
+    lcd.drawText(1, y, "LogCleaner", INVERS)
+    y = newLine(y, 2)
 
     if state == STATE_DONE then
-        lcd.drawText(1,20, "Purged " .. deletedFiles .. " files")
-        lcd.drawText(1, 40, "Press RTN")
+        lcd.drawText(1, y, "Purged " .. deletedFiles .. " files")
+        y = newLine(y)
+        lcd.drawText(1, y, "Press RTN")
     else
-        lcd.drawText(1, 10, "For each model:")
-        lcd.drawText(1, 40, "Long press Enter")
-        lcd.drawText(1, 50, "to exectue")
-
+        local y = 20
+        lcd.drawText(1, y, "For each model:")
+        y = newLine(y)
         if state == STATE_START then
-            lcd.drawCombobox(1, 20, 120, menu_items, action, INVERS)
+            lcd.drawText(2 * textWidth, y, actionSelector:getValue(), INVERS)
         elseif state == STATE_SELECTING then
-            lcd.drawCombobox(1, 20, 120, menu_items, action, BLINK)
+            lcd.drawText(2 * textWidth, y, actionSelector:getValue(), BLINK)
         end
+        y = newLine(y)
+        lcd.drawText(1, y, "Long press Enter")
+        y = newLine(y)
+        lcd.drawText(1, y, "to exectue")
     end
-end
-
-local function nextItem(list, current)
-    if current < #list - 1 then
-        current = current + 1
-    end
-    return current
-end
-
-local function prevItem(list, current)
-    if current > 0 then
-        current = current - 1
-    end
-    return current
 end
 
 local function handleStart(event)
     updateGui()
     if event == EVT_VIRTUAL_ENTER then
         state = STATE_SELECTING
+        actionSelector:setState(Selection.STATE_EDITING)
     elseif event == EVT_VIRTUAL_ENTER_LONG then
         state = STATE_EXECUTING
+        actionSelector:setState(Selection.STATE_IDLE)
     end
     return 0
 end
@@ -157,9 +195,9 @@ end
 local function handleSelecting(event)
     updateGui()
     if event == EVT_VIRTUAL_NEXT then
-        action = nextItem(menu_items, action)
+        actionSelector:incValue()
     elseif event == EVT_VIRTUAL_PREV then
-        action = prevItem(menu_items, action)
+        actionSelector:decValue()
     elseif event == EVT_VIRTUAL_ENTER then
         state = STATE_START
     end
@@ -167,6 +205,7 @@ local function handleSelecting(event)
 end
 
 local function handleExecuting(event)
+    local action = actionSelector:getIndex()
     deletedFiles = cleanLogs(action)
     state = STATE_DONE
     return 0
@@ -178,6 +217,17 @@ local function handleDone(event)
         state = STATE_START
     end
     return 0
+end
+
+local function init()
+    local w
+    if lcd.RGB ~= nil then
+        w, textHeight = lcd.sizeText("Hg")
+        textWidth = w / 2
+    else
+        textWidth = 8
+        textHeight = 8
+    end
 end
 
 local function run(event)
@@ -195,5 +245,5 @@ local function run(event)
 end
 
 return {
-    run = run
+    init = init, run = run
 }
