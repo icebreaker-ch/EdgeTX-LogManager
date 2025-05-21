@@ -1,8 +1,9 @@
 local OPTION_ALL_MODELS = 1
 
-local OPTION_KEEP_LATEST_DATE = 1
-local OPTION_KEEP_LAST_FLIGHT = 2
-local OPTION_DELETE_ALL = 3
+local OPTION_DELETE_EMPTY_LOGS = 1
+local OPTION_KEEP_LATEST_DATE = 2
+local OPTION_KEEP_LAST_FLIGHT = 3
+local OPTION_DELETE_ALL = 4
 
 local exitCode = 0
 local uiChanged = false
@@ -23,7 +24,7 @@ function UiModel.new()
     local self = setmetatable({}, UiModel)
     self.modelOptions = {}
     self.selectedModelOption = 1
-    self.deleteOptions = {"Keep latest date", "Keep last flight", "Delete all Logs" }
+    self.deleteOptions = {"Delete empty logs", "Keep latest date", "Keep last flight", "Delete all Logs" }
     self.selectedDeleteOption = 1
     return self
 end
@@ -100,14 +101,23 @@ local function onDeleteLogsPressed()
 
     local filesToDelete = {}
     local model = uiModel:getSelectedModel()
+    local deleteOption = uiModel:getDeleteOption()
 
-    if uiModel.selectedDeleteOption == OPTION_DELETE_ALL then
+    if deleteOption == OPTION_DELETE_EMPTY_LOGS then
+        if model then
+            filesToDelete = logFiles:getEmptyLogsForModel(model)
+        else -- All models
+            for _,m in pairs(logFiles:getModels()) do
+                filesToDelete = concat(filesToDelete, logFiles:getEmptyLogsForModel(m))
+            end
+        end
+    elseif deleteOption == OPTION_DELETE_ALL then
         if model then
             filesToDelete = logFiles:getLogsForModel(model)
         else -- All models
             filesToDelete = logFiles:getAllLogs()
         end
-    elseif uiModel.selectedDeleteOption == OPTION_KEEP_LAST_FLIGHT then
+    elseif deleteOption == OPTION_KEEP_LAST_FLIGHT then
         if model then
             filesToDelete = concat(filesToDelete, logFiles:getAllButLast(model))
         else -- All models
@@ -115,7 +125,7 @@ local function onDeleteLogsPressed()
                 filesToDelete = concat(filesToDelete, logFiles:getAllButLast(m))
             end
         end
-    elseif uiModel.selectedDeleteOption == OPTION_KEEP_LATEST_DATE then
+    elseif deleteOption == OPTION_KEEP_LATEST_DATE then
         if model then
             filesToDelete = concat(filesToDelete, logFiles:getAllButLastDate(model))
         else -- ALl models

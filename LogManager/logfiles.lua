@@ -18,7 +18,8 @@ function LogFiles:read()
     self.map = {}
     for f in dir(LOG_DIR) do
         if LogFile.isLogFile(f) then
-            local logFile = LogFile.new(f)
+            local info = fstat(LOG_DIR .. "/" .. f)
+            local logFile = LogFile.new(f, info)
             local modelName = logFile:getModelName()
             if not self.map[modelName] then
                 self.map[modelName] = {}
@@ -64,6 +65,16 @@ end
 
 function LogFiles:getLogsForModel(modelName)
     return self.map[modelName]
+end
+
+function LogFiles:getEmptyLogsForModel(modelName)
+    local logs = {}
+    for _,v in pairs(self.map[modelName]) do
+        if v:getSize() == 0 then
+            table.insert(logs, v)
+        end
+    end
+    return logs
 end
 
 function LogFiles:getLastForModel(modelName)
