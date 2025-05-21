@@ -1,5 +1,6 @@
 -- class LogFiles
-local LogFile = require "logfile"
+local fLogFile = loadfile("/SCRIPTS/TOOLS/LogManager/logfile.lua")
+local LogFile = fLogFile()
 
 local LOG_DIR = "/LOGS"
 

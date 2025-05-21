@@ -1,5 +1,3 @@
-package.path = package.path .. ";LogManager/?.lua"
-
 local OPTION_ALL_MODELS = 1
 
 local OPTION_KEEP_LATEST_DATE = 1
@@ -9,7 +7,8 @@ local OPTION_DELETE_ALL = 3
 local exitCode = 0
 local uiChanged = false
 
-local LogFiles = require "logfiles"
+local fLogFiles = loadfile("/SCRIPTS/TOOLS/LogManager/logfiles.lua")
+local LogFiles = fLogFiles()
 
 local logFiles = LogFiles.new()
 
@@ -109,9 +108,13 @@ local function onDeleteLogsPressed()
         end
     end
 
-    lvgl.confirm({title = "Delete",
-                  message = "Really delete " .. #filesToDelete .. " files?",
-                  confirm = function() return onConfirm(filesToDelete) end})
+    if #filesToDelete > 0 then
+        lvgl.confirm({title = "Delete",
+                      message = "Really delete " .. #filesToDelete .. " files?",
+                      confirm = function() return onConfirm(filesToDelete) end})
+    else
+        lvgl.message({title = "Message", message = "No files to delete", details = "Press RTN to continue"})
+    end
 end
 
 local function redraw()
