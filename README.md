@@ -1,19 +1,32 @@
-# LogCleaner
-A tool for cleaning LOG-Files in an EdgeTX transmitter.
+# LogManager
+A tool for managing LOG-Files in an EdgeTX color RC transmitter.
+Actions can be performed on all models or a selected model.
+
+![start](https://github.com/user-attachments/assets/ab624f43-ed1d-4521-943b-24e5f55ae9ab)
+
+## Model selection
+
+![modelSelection](https://github.com/user-attachments/assets/b45c827b-fd70-4740-9f43-216a48ceee2f)
+
 ## Actions
 The following actions can be executed:
-- Keep latest date: Keeps all log files for the latest flying day for each model.
-- Keep latest log: Keeps the latest log file for each model
-- Delete all: deletes all log files found in the LOGS folder
-## Screenshots
-Start screen:
+- Keep latest date: Keeps all log files for the latest flying day for the selcted model(s).
+- Keep last flight: Keeps the latest log file for the selected model(s)
+- Delete all Logs: Deletes all log files found for the selected model(s)
 
-![screenshot1](https://github.com/user-attachments/assets/40264900-df9e-4982-baa4-3080097849cf)
+![actionSelection](https://github.com/user-attachments/assets/9b90d415-8e73-4459-8181-27d91e86c307)
 
-Selecting action:
+![confirm](https://github.com/user-attachments/assets/7eaacdd5-11ea-410a-b3af-07ee60db548d)
 
-![screenshot2](https://github.com/user-attachments/assets/0a004426-3dcc-4d53-9414-2f30fa5bec90)
-
-Status screen:
-
-![screenshot3](https://github.com/user-attachments/assets/423f6470-7b1f-4087-979d-d39163541904)
+## Installation
+Copy the file `LogManager.lua` and the folder `LogManager` to the folder `/SCRIPTS/TOOLS` on your transmitter.
+The structure on your SD card should look like this afterwards:
+```
+/TOOLS
+    LogManager.lua
+    :
+    /LogManager
+        logfile.lua
+        logfiles.lua
+        set.lua
+```
