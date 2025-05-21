@@ -12,6 +12,8 @@ local LogFiles = fLogFiles()
 
 local logFiles = LogFiles.new()
 
+local labelLogCount
+
 -- UI model
 local MODEL_OPTION_ALL = "* (all Models)"
 local UiModel = {}
@@ -40,7 +42,7 @@ function UiModel:getSelectedModel()
         return self.modelOptions[self.selectedModelOption]
     end
 end
-
+    
 function UiModel:getModelOption()
     return self.selectedModelOption
 end
@@ -58,6 +60,21 @@ function UiModel:setDeleteOption(index)
 end
 
 local uiModel = UiModel.new()
+
+local function updateLogCount()
+    local logFileCount
+    if uiModel:getModelOption() == OPTION_ALL_MODELS then
+            logFileCount = logFiles:getFileCount()
+    else
+            logFileCount = #logFiles:getLogsForModel(uiModel:getSelectedModel())
+    end
+    labelLogCount:set({text = logFileCount .. " Logfiles"})
+end
+
+local function setModelOption(index)
+    uiModel:setModelOption(index)
+    updateLogCount()
+end
 
 local function concat(table1, table2)
     local result = table1
@@ -118,6 +135,9 @@ local function onDeleteLogsPressed()
 end
 
 local function redraw()
+    local COL = { 10, 150, 300 }
+    local ROW = { 10, 40, 80, 180 }
+
     lvgl.clear();
 
     local page = lvgl.page({title="Log Manager"})
@@ -125,24 +145,29 @@ local function redraw()
     local fileCount = logFiles:getFileCount()
     local modelCount = logFiles:getModelCount()
 
-    labelStatus = page:label({x=10, y = 10,
+    page:label({x=COL[1], y = ROW[1],
             text = "Found " .. fileCount .. " logfiles for " .. modelCount .. " models"})
 
-    page:label({x = 10, y = 40, text = "Select Model(s):"})
-    page:choice({x = 150, y = 40,
+    page:label({x = COL[1], y = ROW[2], text = "Select Model(s):"})
+    page:choice({x = COL[2], y = ROW[2],
         title = "Model",
         get = function() return uiModel:getModelOption() end,
-        set = function(index) return uiModel:setModelOption(index) end,
+        set = setModelOption,
         values = uiModel.modelOptions})
+    local logFileCount = 0
+    labelLogCount = page:label({x = COL[3], y= ROW[2]})
+    updateLogCount()
 
-    page:label({x = 10, y = 80, text = "Select Logfiles:"})
-    page:choice({x = 150, y = 80,
+    page:label({x = COL[1], y = ROW[3], text = "Select Logfiles:"})
+    page:choice({x = COL[2], y = ROW[3],
         title = "Action",
         get = function() return uiModel:getDeleteOption() end,
         set = function(index) return uiModel:setDeleteOption(index) end,
         values = uiModel.deleteOptions})
-    page:button({x = 10, y = 120, text = "Exit", press = onExitPressed})
-    page:button({x = 60, y = 120, text = "Delete Logs", press = onDeleteLogsPressed})
+
+    local box = page:box({x = COL[1], y = ROW[4], flexFlow = lvgl.FLOW_ROW, flexPad = 20})
+    box:button({w = 100, text = "Exit", press = onExitPressed})
+    box:button({w = 100, text = "Delete Logs", press = onDeleteLogsPressed})
 end
 
 local function init()
