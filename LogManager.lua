@@ -1,73 +1,22 @@
-local OPTION_ALL_MODELS = 1
-
-local OPTION_DELETE_EMPTY_LOGS = 1
-local OPTION_KEEP_LATEST_DATE = 2
-local OPTION_KEEP_LAST_FLIGHT = 3
-local OPTION_DELETE_ALL = 4
 
 local exitCode = 0
 local uiChanged = false
 
-local fLogFiles = loadfile("/SCRIPTS/TOOLS/LogManager/logfiles.lua")
-local LogFiles = fLogFiles()
-
-local logFiles = LogFiles.new()
+local LogFiles = loadfile("/SCRIPTS/TOOLS/LogManager/logfiles.lua")()
+local logFiles = LogFiles:new()
 
 local labelLogCount
 
--- UI model
-local MODEL_OPTION_ALL = "* (all Models)"
-local UiModel = {}
-UiModel.__index = UiModel
-
-function UiModel.new()
-    local self = setmetatable({}, UiModel)
-    self.modelOptions = {}
-    self.selectedModelOption = 1
-    self.deleteOptions = {"Delete empty logs", "Keep latest date", "Keep last flight", "Delete all Logs" }
-    self.selectedDeleteOption = 1
-    return self
-end
-
-function UiModel:update(logFiles)
-   self.modelOptions = { MODEL_OPTION_ALL }
-    for _,v in pairs(logFiles:getModels()) do
-        self.modelOptions[#self.modelOptions + 1] = v
-    end
-end
-
-function UiModel:getSelectedModel()
-    if self.selectedModelOption == OPTION_ALL_MODELS then
-        return nil
-    else
-        return self.modelOptions[self.selectedModelOption]
-    end
-end
-    
-function UiModel:getModelOption()
-    return self.selectedModelOption
-end
-
-function UiModel:setModelOption(index)
-    self.selectedModelOption = index
-end
-
-function UiModel:getDeleteOption()
-    return self.selectedDeleteOption
-end
-
-function UiModel:setDeleteOption(index)
-    self.selectedDeleteOption = index
-end
-
-local uiModel = UiModel.new()
+local UiModel = loadfile("/SCRIPTS/TOOLS/LogManager/uimodel.lua")()
+local uiModel = UiModel:new()
 
 local function updateLogCount()
     local logFileCount
-    if uiModel:getModelOption() == OPTION_ALL_MODELS then
+    local selectedModel = uiModel:getSelectedModel()
+    if not selectedModel then -- All Models
             logFileCount = logFiles:getFileCount()
     else
-            logFileCount = #logFiles:getLogsForModel(uiModel:getSelectedModel())
+            logFileCount = #logFiles:getLogsForModel(selectedModel)
     end
     labelLogCount:set({text = logFileCount .. " Logfiles"})
 end
@@ -93,7 +42,7 @@ local function onConfirm(filesToDelete)
     logFiles:delete(filesToDelete)
     logFiles:read()
     uiModel:update(logFiles)
-    uiModel:setModelOption(OPTION_ALL_MODELS)
+    uiModel:setModelOption(UiModel.OPTION_ALL_MODELS)
     uiChanged = true
 end
 
@@ -103,7 +52,7 @@ local function onDeleteLogsPressed()
     local model = uiModel:getSelectedModel()
     local deleteOption = uiModel:getDeleteOption()
 
-    if deleteOption == OPTION_DELETE_EMPTY_LOGS then
+    if deleteOption == UiModel.OPTION_DELETE_EMPTY_LOGS then
         if model then
             filesToDelete = logFiles:getEmptyLogsForModel(model)
         else -- All models
@@ -111,13 +60,13 @@ local function onDeleteLogsPressed()
                 filesToDelete = concat(filesToDelete, logFiles:getEmptyLogsForModel(m))
             end
         end
-    elseif deleteOption == OPTION_DELETE_ALL then
+    elseif deleteOption == UiModel.OPTION_DELETE_ALL then
         if model then
             filesToDelete = logFiles:getLogsForModel(model)
         else -- All models
             filesToDelete = logFiles:getAllLogs()
         end
-    elseif deleteOption == OPTION_KEEP_LAST_FLIGHT then
+    elseif deleteOption == UiModel.OPTION_KEEP_LAST_FLIGHT then
         if model then
             filesToDelete = concat(filesToDelete, logFiles:getAllButLast(model))
         else -- All models
@@ -125,7 +74,7 @@ local function onDeleteLogsPressed()
                 filesToDelete = concat(filesToDelete, logFiles:getAllButLast(m))
             end
         end
-    elseif deleteOption == OPTION_KEEP_LATEST_DATE then
+    elseif deleteOption == UiModel.OPTION_KEEP_LATEST_DATE then
         if model then
             filesToDelete = concat(filesToDelete, logFiles:getAllButLastDate(model))
         else -- ALl models

@@ -1,13 +1,14 @@
 -- Class LogFile
-LogFile = { file_name = nil, model_name = nil}
-LogFile.__index = LogFile
+LogFile = { }
 
-function LogFile.new(file_name, info)
-    local self = setmetatable({}, LogFile)
+function LogFile:new(file_name, info)
+    local o = LogFile
+    self = setmetatable(o, self)
+    self.__index = self
     self.file_name = file_name
     self.model_name = string.sub(file_name, 1, #file_name - 22)
     self.size = info.size
-    return self
+    return o
 end
 
 function LogFile.isLogFile(fname)

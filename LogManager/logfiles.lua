@@ -1,15 +1,15 @@
--- class LogFiles
-local fLogFile = loadfile("/SCRIPTS/TOOLS/LogManager/logfile.lua")
-local LogFile = fLogFile()
+-- Class LogFiles
+local LogFile = loadfile("/SCRIPTS/TOOLS/LogManager/logfile.lua")()
 
 local LOG_DIR = "/LOGS"
 
 LogFiles = { }
-LogFiles.__index = LogFiles
 
-function LogFiles.new()
-    local self = setmetatable({}, LogFiles)
-    return self
+function LogFiles:new()
+    local o = LogFiles
+    self.__index = self
+    self = setmetatable(o, self)
+    return o
 end
 
 function LogFiles:read()
@@ -19,7 +19,7 @@ function LogFiles:read()
     for f in dir(LOG_DIR) do
         if LogFile.isLogFile(f) then
             local info = fstat(LOG_DIR .. "/" .. f)
-            local logFile = LogFile.new(f, info)
+            local logFile = LogFile:new(f, info)
             local modelName = logFile:getModelName()
             if not self.map[modelName] then
                 self.map[modelName] = {}
