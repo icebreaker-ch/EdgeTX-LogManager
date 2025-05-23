@@ -3,13 +3,26 @@ local LogFile = loadfile("/SCRIPTS/TOOLS/LogManager/logfile.lua")()
 
 local LOG_DIR = "/LOGS"
 
-LogFiles = { }
+LogFiles = {}
 
-function LogFiles:new()
-    local o = LogFiles
+function LogFiles:new(o)
+    o = o or {}
     self.__index = self
     self = setmetatable(o, self)
     return o
+end
+
+function LogFiles:printModel(model)
+    for _,v in pairs(self.map[model]) do
+        print("    " .. v:getFileName())
+    end
+end
+
+function LogFiles:printMap()
+    for k,_ in pairs(self.map) do
+        print(k .. ":")
+        self:printModel(k)
+    end
 end
 
 function LogFiles:read()
@@ -19,7 +32,7 @@ function LogFiles:read()
     for f in dir(LOG_DIR) do
         if LogFile.isLogFile(f) then
             local info = fstat(LOG_DIR .. "/" .. f)
-            local logFile = LogFile:new(f, info)
+            local logFile = LogFile:new(nil, f, info)
             local modelName = logFile:getModelName()
             if not self.map[modelName] then
                 self.map[modelName] = {}
@@ -29,6 +42,7 @@ function LogFiles:read()
             self.fileCount = self.fileCount + 1
         end
     end
+    -- self:printMap()
 end
 
 function LogFiles:delete(files)
@@ -90,7 +104,6 @@ end
 function LogFiles:getLastDateForModel(modelName)
     local lastDate = nil
     for _,v in pairs(self.map[modelName]) do
-        print(v:getDate())
         if not lastDate or lastDate < v:getDate() then
             lastDate = v:getDate()
         end

@@ -1,13 +1,13 @@
 -- Class LogFile
-LogFile = { }
+LogFile = {}
 
-function LogFile:new(file_name, info)
-    local o = LogFile
-    self = setmetatable(o, self)
+function LogFile:new(o, fileName, info)
+    o = o or { }
+    setmetatable(o, self)
     self.__index = self
-    self.file_name = file_name
-    self.model_name = string.sub(file_name, 1, #file_name - 22)
-    self.size = info.size
+    o.fileName = fileName
+    o.modelName = string.sub(fileName, 1, #fileName - 22)
+    o.info = info
     return o
 end
 
@@ -16,19 +16,19 @@ function LogFile.isLogFile(fname)
 end
 
 function LogFile:getModelName()
-    return self.model_name
+    return self.modelName
 end
 
 function LogFile:getFileName()
-    return self.file_name
+    return self.fileName
 end
 
 function LogFile:getDate()
-    return string.sub(self.file_name, #self.file_name - 20, #self.file_name - 11)
+    return string.sub(self.fileName, #self.fileName - 20, #self.fileName - 11)
 end
 
 function LogFile:getSize()
-    return self.size
+    return self.info.size
 end
 
 return LogFile
