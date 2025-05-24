@@ -1,5 +1,3 @@
--- Class ColorUi
-
 local function concat(table1, table2)
     local result = table1
     for _,v in pairs(table2) do
@@ -8,16 +6,16 @@ local function concat(table1, table2)
     return result
 end
 
-ColorUi = {}
+-- Class ColorUi
+local ColorUi = {}
+ColorUi.__index = ColorUi
 
-function ColorUi:new(uiModel, logFiles)
-    local o = ColorUi
-    self = setmetatable(o, self)
-    self.__index = self
+function ColorUi.new(uiModel, logFiles)
+    local self = setmetatable({}, ColorUi)
     self.uiModel = uiModel
     self.logFiles = logFiles
     self.exitCode = 0
-    return o
+    return self
 end
 
 function ColorUi:updateLogCount()

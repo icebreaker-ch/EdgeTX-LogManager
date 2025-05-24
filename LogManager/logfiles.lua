@@ -3,13 +3,12 @@ local LogFile = loadfile("/SCRIPTS/TOOLS/LogManager/logfile.lua")()
 
 local LOG_DIR = "/LOGS"
 
-LogFiles = {}
+local LogFiles = {}
+LogFiles.__index = LogFiles
 
-function LogFiles:new(o)
-    o = o or {}
-    self.__index = self
-    self = setmetatable(o, self)
-    return o
+function LogFiles.new()
+    local self = setmetatable({}, LogFiles)
+    return self
 end
 
 function LogFiles:printModel(model)
@@ -32,7 +31,7 @@ function LogFiles:read()
     for f in dir(LOG_DIR) do
         if LogFile.isLogFile(f) then
             local info = fstat(LOG_DIR .. "/" .. f)
-            local logFile = LogFile:new(nil, f, info)
+            local logFile = LogFile.new(f, info)
             local modelName = logFile:getModelName()
             if not self.map[modelName] then
                 self.map[modelName] = {}

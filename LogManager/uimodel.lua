@@ -1,5 +1,6 @@
 -- Class UI model
 local UiModel = {}
+UiModel.__index = UiModel
 
 UiModel.OPTION_ALL_MODELS = 1
 UiModel.OPTION_DELETE_EMPTY_LOGS = 1
@@ -12,16 +13,14 @@ UiModel.SELECTION_CHANGED = 1
 UiModel.LOGFILES_CHANGED = 2
 
 
-function UiModel:new(o)
-    o = o or {}
-    setmetatable(o, self)
-    self.__index = self
+function UiModel.new()
+    local self = setmetatable({}, UiModel)
     self.modelOptions = {}
     self.selectedModelOption = 1
     self.deleteOptions = {"Delete empty logs", "Keep latest date", "Keep last flight", "Delete all Logs" }
     self.selectedDeleteOption = 1
     self.changed = UiModel.NO_CHANGE
-    return o
+    return self
 end
 
 function UiModel:update(logFiles)

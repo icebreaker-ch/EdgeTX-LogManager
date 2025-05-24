@@ -1,14 +1,13 @@
 -- Class LogFile
-LogFile = {}
+local LogFile = {}
+LogFile.__index = LogFile
 
-function LogFile:new(o, fileName, info)
-    o = o or { }
-    setmetatable(o, self)
-    self.__index = self
-    o.fileName = fileName
-    o.modelName = string.sub(fileName, 1, #fileName - 22)
-    o.info = info
-    return o
+function LogFile.new(fileName, info)
+    local self = setmetatable({}, LogFile)
+    self.fileName = fileName
+    self.info = info
+    self.modelName = string.sub(fileName, 1, #fileName - 22)
+    return self
 end
 
 function LogFile.isLogFile(fname)
