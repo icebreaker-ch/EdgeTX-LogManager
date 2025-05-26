@@ -19,14 +19,33 @@ The following actions can be executed:
 ![confirm](https://github.com/user-attachments/assets/7eaacdd5-11ea-410a-b3af-07ee60db548d)
 
 ## Installation
-Copy the file `LogManager.lua` and the folder `LogManager` to the folder `/SCRIPTS/TOOLS` on your transmitter.
+### Color screen Radios
+Copy the file `LogManager.lua` to the folder `/SCRIPTS/TOOLS` on your transmitter.
+Copy the files `colorui.lua`, `logfile.lua`, `logfiles.lua, `selector.lua` and `uimodel.lua`
+to the folder `/SCRIPTS/TOOLS/LogManager`
 The structure on your SD card should look like this afterwards:
 ```
 /TOOLS
     LogManager.lua
     :
     /LogManager
+        colorui.lua
         logfile.lua
         logfiles.lua
-        set.lua
 ```
+### Black and white screen Radios
+Copy the file `BwLogManager.lua` to the folder `/SCRIPTS/TOOLS` on your transmitter.
+Copy the files `bwui.lua`, `logfile.lua`, `logfiles.lua, `selector.lua` and `uimodel.lua`
+to the folder `/SCRIPTS/TOOLS/LogManager`
+The structure on your SD card should look like this afterwards:
+```
+/TOOLS
+    LogManager.lua
+    :
+    /LogManager
+        bwui.lua
+        logfile.lua
+        logfiles.lua
+        selector.lua
+```
+
