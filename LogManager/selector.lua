@@ -13,6 +13,10 @@ function Selector.new(values, index)
     return self
 end
 
+function Selector:setOnChange(f)
+    self.onChange = f
+end
+
 function Selector:setValues(values)
     self.values = values
 end
@@ -50,12 +54,18 @@ end
 function Selector:incValue()
     if self.index < #self.values then
         self.index = self.index + 1
+        if self.onChange then
+            self.onChange(self.index)
+        end
     end
 end
 
 function Selector:decValue()
     if self.index > 1 then
         self.index = self.index - 1
+        if self.onChange then
+            self.onChange(self.index)
+        end
     end
 end
 

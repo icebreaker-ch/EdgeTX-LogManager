@@ -30,6 +30,9 @@ function BwUi.new(uiModel, logFiles)
     self.uiModel = uiModel
     self.logFiles = logFiles
     self.deletedFiles = 0
+
+    actionSelector:setOnChange(function(index) uiModel:setDeleteOption(index) end)
+    modelSelector:setOnChange(function(index) uiModel:setModelOption(index) end)
     if lcd.RGB ~= nil then
         local w, textHeight = lcd.sizeText("Hg")
         textWidth = w / 2
@@ -113,7 +116,6 @@ function BwUi:handleChoiceModelEditing(event)
         modelSelector:setState(Selector.STATE_SELECTED)
         state = STATE_CHOICE_MODEL_SELECTED
     end
-    self.uiModel:setModelOption(modelSelector:getIndex())
     self:updateUi()
     return 0
 end
@@ -143,7 +145,6 @@ function BwUi:handleChoiceActionEditing(event)
         actionSelector:setState(Selector.STATE_IDLE)
         state = STATE_CHOICE_ACTION_SELECTED
     end
-    self.uiModel:setDeleteOption(actionSelector:getIndex())
     self:updateUi()
     return 0
 end
