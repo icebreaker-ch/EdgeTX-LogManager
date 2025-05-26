@@ -34,7 +34,8 @@ function BwUi.new(uiModel, logFiles)
     actionSelector:setOnChange(function(index) uiModel:setDeleteOption(index) end)
     modelSelector:setOnChange(function(index) uiModel:setModelOption(index) end)
     if lcd.RGB ~= nil then
-        local w, textHeight = lcd.sizeText("Hg")
+        local w
+        w, textHeight = lcd.sizeText("Hg")
         textWidth = w / 2
     else
         textWidth = 6
@@ -58,7 +59,7 @@ function BwUi:updateUi()
     y = newLine(y)
     lcd.drawText(1, y, fileCount .. " Logs for " .. modelCount .. " Model(s)")
     
-    y = 20
+    y = newLine(y, 1.5)
     if state == STATE_REPORT then
         lcd.drawText(1, y, "Purged " .. self.deletedFiles .. " files")
         y = newLine(y)
