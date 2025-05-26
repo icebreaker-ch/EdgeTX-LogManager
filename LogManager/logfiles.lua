@@ -53,6 +53,7 @@ function LogFiles:delete(files)
     for _,v in pairs(files) do
         del(LOG_DIR .. "/" .. v:getFileName())
     end
+    return #files
 end
 
 function LogFiles:getModels()
