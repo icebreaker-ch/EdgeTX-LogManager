@@ -3,6 +3,11 @@ local LogFile = loadfile("/SCRIPTS/TOOLS/LogManager/logfile.lua")()
 
 local LOG_DIR = "/LOGS"
 
+local function append(logs, log)
+    logs[#logs + 1] = log
+end
+
+
 local LogFiles = {}
 LogFiles.__index = LogFiles
 
@@ -70,7 +75,7 @@ function LogFiles:getAllLogs()
     local logs = {}
     for model in pairs(self.map) do
         for _,log in pairs(self.map[model]) do
-            table.insert(logs, log)
+            append(logs, log)
         end
     end
     return logs
@@ -84,7 +89,7 @@ function LogFiles:getEmptyLogsForModel(modelName)
     local logs = {}
     for _,v in pairs(self.map[modelName]) do
         if v:getSize() == 0 then
-            table.insert(logs, v)
+            append(logs, v)
         end
     end
     return logs
@@ -115,7 +120,7 @@ function LogFiles:getAllButLastDate(modelName)
     local lastDate = self:getLastDateForModel(modelName);
     for _,v in pairs(self.map[modelName]) do
         if v:getDate() < lastDate then
-            table.insert(logs, v)
+            append(logs, v)
         end
     end
     return logs
@@ -126,7 +131,7 @@ function LogFiles:getAllButLast(modelName)
     local last = self:getLastForModel(modelName)
     for _,v in pairs(self.map[modelName]) do
         if v:getFileName() ~= last:getFileName() then
-            table.insert(logs, v)
+            append(logs, v)
         end
     end
     return logs
