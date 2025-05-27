@@ -130,7 +130,23 @@ function ColorUi:update(change)
     end
 end
 
-function ColorUi:getExitCode()
+function ColorUi:init()
+    if lvgl ~= nil then
+        self.logFiles:read()
+        self.uiModel:update(self.logFiles)
+    end
+end
+
+function ColorUi:run(event, touchState)
+    if (lvgl) then
+        local change = self.uiModel:getChanged()
+        if change ~= self.uiModel.NO_CHANGE then
+            self:update(change)
+        end
+    else
+        lcd.clear()
+        lcd.drawText(10, 10, "LVGL support required")
+    end
     return self.exitCode
 end
 
