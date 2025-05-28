@@ -138,7 +138,7 @@ function ColorUi:init()
 end
 
 function ColorUi:run(event, touchState)
-    if (lvgl) then
+    if lvgl then
         local change = self.uiModel:getChanged()
         if change ~= self.uiModel.NO_CHANGE then
             self:update(change)
