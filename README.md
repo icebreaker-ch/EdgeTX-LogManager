@@ -1,12 +1,14 @@
 # LogManager
-A tool for managing LOG-Files in an EdgeTX color RC transmitter.
+A tool for managing LOG-Files in an EdgeTX b/w or color RC transmitter.
 Actions can be performed on all models or a selected model.
 
 ![start](https://github.com/user-attachments/assets/ab624f43-ed1d-4521-943b-24e5f55ae9ab)
 
+![screenshot_zorro_25-05-28_08-47-48](https://github.com/user-attachments/assets/27e2f7e3-b8c9-473e-9a59-14fe888ec615) ![screenshot_zorro_25-05-28_08-48-42](https://github.com/user-attachments/assets/59cdf50a-f4c0-48cb-a38b-a9db05439ee6)
+
 ## Model selection
 
-![modelSelection](https://github.com/user-attachments/assets/b45c827b-fd70-4740-9f43-216a48ceee2f)
+![modelSelection](https://github.com/user-attachments/assets/b45c827b-fd70-4740-9f43-216a48ceee2f) 
 
 ## Actions
 The following actions can be executed:
