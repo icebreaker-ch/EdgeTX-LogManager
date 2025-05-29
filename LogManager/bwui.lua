@@ -1,6 +1,4 @@
 local Selector = loadfile("/SCRIPTS/TOOLS/LogManager/selector.lua")()
-local modelSelector = Selector.new()
-local actionSelector = Selector.new({"Delete empty", "Keep latest date", "Keep last flight", "Delete all" }, 1)
 
 local LOG_DIR = "/LOGS"
 
@@ -30,9 +28,11 @@ function BwUi.new(uiModel, logFiles)
     self.uiModel = uiModel
     self.logFiles = logFiles
     self.deletedFiles = 0
+    self.modelSelector = Selector.new()
+    self.actionSelector = Selector.new({"Delete empty", "Keep latest date", "Keep last flight", "Delete all" }, 1)
 
-    actionSelector:setOnChange(function(index) uiModel:setDeleteOption(index) end)
-    modelSelector:setOnChange(function(index) uiModel:setModelOption(index) end)
+    self.actionSelector:setOnChange(function(index) uiModel:setDeleteOption(index) end)
+    self.modelSelector:setOnChange(function(index) uiModel:setModelOption(index) end)
     if lcd.RGB ~= nil then
         local w
         w, textHeight = lcd.sizeText("Hg")
@@ -67,12 +67,12 @@ function BwUi:updateUi()
     else
         -- Model Selector
         lcd.drawText(1, y, "Model:")
-        lcd.drawText(6 * textWidth, y, modelSelector:getValue(), modelSelector:getFlags())
+        lcd.drawText(6 * textWidth, y, self.modelSelector:getValue(), self.modelSelector:getFlags())
         y = newLine(y)
 
         -- Action Selector
         lcd.drawText(1, y, "Actn:")
-        lcd.drawText(6 * textWidth, y, actionSelector:getValue(), actionSelector:getFlags())
+        lcd.drawText(6 * textWidth, y, self.actionSelector:getValue(), self.actionSelector:getFlags())
         y = newLine(y)
 
         lcd.drawText(1, y, "Long press Enter")
@@ -83,7 +83,7 @@ end
 
 function BwUi:handleIdle(event)
     if event == EVT_VIRTUAL_NEXT then
-        modelSelector:setState(Selector.STATE_SELECTED)
+        self.modelSelector:setState(Selector.STATE_SELECTED)
         state = STATE_CHOICE_MODEL_SELECTED
     elseif event == EVT_VIRTUAL_ENTER_LONG then
         state = STATE_EXECUTING
@@ -94,14 +94,14 @@ end
 
 function BwUi:handleChoiceModelSelected(event)
     if event == EVT_VIRTUAL_ENTER then
-        modelSelector:setState(Selector.STATE_EDITING)
+        self.modelSelector:setState(Selector.STATE_EDITING)
         state = STATE_CHOICE_MODEL_EDITING
     elseif event == EVT_VIRTUAL_NEXT or event == EVT_VIRTUAL_PREV then
-        modelSelector:setState(Selector.STATE_IDLE)
-        actionSelector:setState(Selector.STATE_SELECTED)
+        self.modelSelector:setState(Selector.STATE_IDLE)
+        self.actionSelector:setState(Selector.STATE_SELECTED)
         state = STATE_CHOICE_ACTION_SELECTED
     elseif event == EVT_VIRTUAL_ENTER_LONG then
-        modelSelector:setState(Selector.STATE_IDLE)
+        self.modelSelector:setState(Selector.STATE_IDLE)
         state = STATE_EXECUTING
     end
     self:updateUi()
@@ -110,11 +110,11 @@ end
 
 function BwUi:handleChoiceModelEditing(event)
     if event == EVT_VIRTUAL_NEXT then
-        modelSelector:incValue()
+        self.modelSelector:incValue()
     elseif event == EVT_VIRTUAL_PREV then
-        modelSelector:decValue()
+        self.modelSelector:decValue()
     elseif event == EVT_VIRTUAL_ENTER then
-        modelSelector:setState(Selector.STATE_SELECTED)
+        self.modelSelector:setState(Selector.STATE_SELECTED)
         state = STATE_CHOICE_MODEL_SELECTED
     end
     self:updateUi()
@@ -123,14 +123,14 @@ end
 
 function BwUi:handleChoiceActionSelected(event)
     if event == EVT_VIRTUAL_ENTER then
-        actionSelector:setState(Selector.STATE_EDITING)
+        self.actionSelector:setState(Selector.STATE_EDITING)
         state = STATE_CHOICE_ACTION_EDITING
     elseif event == EVT_VIRTUAL_NEXT or event == EVT_VIRTUAL_PREV then
-        actionSelector:setState(Selector.STATE_IDLE)
-        modelSelector:setState(Selector.STATE_SELECTED)
+        self.actionSelector:setState(Selector.STATE_IDLE)
+        self.modelSelector:setState(Selector.STATE_SELECTED)
         state = STATE_CHOICE_MODEL_SELECTED
     elseif event == EVT_VIRTUAL_ENTER_LONG then
-        actionSelector:setState(Selector.STATE_IDLE)
+        self.actionSelector:setState(Selector.STATE_IDLE)
         state = STATE_EXECUTING
     end
     self:updateUi()
@@ -139,11 +139,11 @@ end
 
 function BwUi:handleChoiceActionEditing(event)
     if event == EVT_VIRTUAL_NEXT then
-        actionSelector:incValue()
+        self.actionSelector:incValue()
     elseif event == EVT_VIRTUAL_PREV then
-        actionSelector:decValue()
+        self.actionSelector:decValue()
     elseif event == EVT_VIRTUAL_ENTER then
-        actionSelector:setState(Selector.STATE_IDLE)
+        self.actionSelector:setState(Selector.STATE_IDLE)
         state = STATE_CHOICE_ACTION_SELECTED
     end
     self:updateUi()
@@ -204,12 +204,12 @@ end
 function BwUi:reload()
     self.logFiles:read()
     self.uiModel:update(self.logFiles)
-    modelSelector:setValues(self.uiModel:getModelOptions())
-    modelSelector:setIndex(1)
-    modelSelector:setState(Selector.STATE_IDLE)
+    self.modelSelector:setValues(self.uiModel:getModelOptions())
+    self.modelSelector:setIndex(1)
+    self.modelSelector:setState(Selector.STATE_IDLE)
 
-    actionSelector:setIndex(1)
-    actionSelector:setState(Selector.STATE_IDLE)
+    self.actionSelector:setIndex(1)
+    self.actionSelector:setState(Selector.STATE_IDLE)
 end
 
 function BwUi:handleReport(event)
