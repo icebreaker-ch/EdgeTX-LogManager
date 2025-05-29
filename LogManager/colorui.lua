@@ -21,11 +21,7 @@ end
 function ColorUi:updateLogCount()
     local logFileCount
     local selectedModel = self.uiModel:getSelectedModel()
-    if not selectedModel then -- All Models
-            logFileCount = self.logFiles:getFileCount()
-    else
-            logFileCount = #self.logFiles:getLogsForModel(selectedModel)
-    end
+    logFileCount = self.logFiles:getFileCount(selectedModel)
     self.labelLogCount:set({text = logFileCount .. " Logfiles"})
 end
 
@@ -40,34 +36,30 @@ end
 function ColorUi:onDeleteLogsPressed()
 
     local filesToDelete = {}
-    local model = self.uiModel:getSelectedModel()
+    local selectedModel = self.uiModel:getSelectedModel()
     local deleteOption = self.uiModel:getDeleteOption()
 
     if deleteOption == self.uiModel.OPTION_DELETE_EMPTY_LOGS then
-        if model then
-            filesToDelete = self.logFiles:getEmptyLogsForModel(model)
+        if selectedModel then
+            filesToDelete = self.logFiles:getEmptyLogsForModel(selectedModel)
         else -- All models
             for _,m in pairs(self.logFiles:getModels()) do
                 filesToDelete = concat(filesToDelete, self.logFiles:getEmptyLogsForModel(m))
             end
         end
     elseif deleteOption == self.uiModel.OPTION_DELETE_ALL then
-        if model then
-            filesToDelete = self.logFiles:getLogsForModel(model)
-        else -- All models
-            filesToDelete = self.logFiles:getAllLogs()
-        end
+        filesToDelete = self.logFiles:getLogs(selectedModel)
     elseif deleteOption == self.uiModel.OPTION_KEEP_LAST_FLIGHT then
-        if model then
-            filesToDelete = concat(filesToDelete, self.logFiles:getAllButLast(model))
+        if selectedModel then
+            filesToDelete = concat(filesToDelete, self.logFiles:getAllButLast(selectedModel))
         else -- All models
             for _,m in pairs(self.logFiles:getModels()) do
                 filesToDelete = concat(filesToDelete, self.logFiles:getAllButLast(m))
             end
         end
     elseif deleteOption == self.uiModel.OPTION_KEEP_LATEST_DATE then
-        if model then
-            filesToDelete = concat(filesToDelete, self.logFiles:getAllButLastDate(model))
+        if selectedModel then
+            filesToDelete = concat(filesToDelete, self.logFiles:getAllButLastDate(selectedModel))
         else -- ALl models
             for _,m in pairs(self.logFiles:getModels()) do
                 filesToDelete = concat(filesToDelete, self.logFiles:getAllButLastDate(m))

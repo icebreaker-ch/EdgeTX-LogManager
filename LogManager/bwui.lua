@@ -169,11 +169,7 @@ function BwUi:deleteLogs(model, action)
             end
         end
     elseif action == ACTION_DELETE_ALL then
-        if model then
-            filesToDelete = self.logFiles:getLogsForModel(model)
-        else -- All models
-            filesToDelete = self.logFiles:getAllLogs()
-        end
+        filesToDelete = self.logFiles:getLogs(model)
     elseif action == ACTION_KEEP_LAST_FLIGHT then
         if model then
             filesToDelete = concat(filesToDelete, self.logFiles:getAllButLast(model))

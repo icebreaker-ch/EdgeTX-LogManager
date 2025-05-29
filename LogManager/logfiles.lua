@@ -68,22 +68,28 @@ function LogFiles:getModelCount()
     return self.modelCount
 end
 
-function LogFiles:getFileCount()
-    return self.fileCount
+-- returns the file count for all models (model == nil) or specific model
+function LogFiles:getFileCount(--[[opt]]model)
+    if model then
+        return #self.map[model]
+    else        
+        return self.fileCount
+    end
 end
 
-function LogFiles:getAllLogs()
+-- returns the logs for all models (model == nil) or specific model
+function LogFiles:getLogs(--[[opt]]model)
     local logs = {}
-    for model in pairs(self.map) do
-        for _,log in pairs(self.map[model]) do
-            append(logs, log)
+    if model then
+        logs = self.map[model]
+    else
+        for model in pairs(self.map) do
+            for _,log in pairs(self.map[model]) do
+                append(logs, log)
+            end
         end
     end
     return logs
-end
-
-function LogFiles:getLogsForModel(modelName)
-    return self.map[modelName]
 end
 
 function LogFiles:getEmptyLogsForModel(modelName)
