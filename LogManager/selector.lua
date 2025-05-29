@@ -47,7 +47,7 @@ function Selector:getFlags()
     elseif self.state == self.STATE_SELECTED then
         return INVERS
     elseif self.state == self.STATE_EDITING then
-        return BLINK
+        return BLINK + INVERS
     end
 end
 
