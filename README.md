@@ -26,7 +26,7 @@ The following actions can be executed:
 ## Installation
 ### Color screen Radios
 Copy the file `LogManager.lua` to the folder `/SCRIPTS/TOOLS` on your transmitter.
-Copy the files `colorui.lua`, `logfile.lua`, `logfiles.lua, `selector.lua` and `uimodel.lua`
+Copy the files `colorui.lua`, `logfile.lua`, `logfiles.lua` and `uimodel.lua`
 to the folder `/SCRIPTS/TOOLS/LogManager`
 The structure on your SD card should look like this afterwards:
 ```
@@ -37,10 +37,11 @@ The structure on your SD card should look like this afterwards:
         colorui.lua
         logfile.lua
         logfiles.lua
+        uimodel.lua
 ```
 ### Black and white screen Radios
-Copy the file `BwLogManager.lua` to the folder `/SCRIPTS/TOOLS` on your transmitter.
-Copy the files `bwui.lua`, `logfile.lua`, `logfiles.lua, `selector.lua` and `uimodel.lua`
+Copy the file `LogManager.lua` to the folder `/SCRIPTS/TOOLS` on your transmitter.
+Copy the files `bwui.lua`, `logfile.lua`, `logfiles.lua`, `selector.lua` and `uimodel.lua`
 to the folder `/SCRIPTS/TOOLS/LogManager`
 The structure on your SD card should look like this afterwards:
 ```
@@ -52,5 +53,6 @@ The structure on your SD card should look like this afterwards:
         logfile.lua
         logfiles.lua
         selector.lua
+        uimodel.lua
 ```
 
