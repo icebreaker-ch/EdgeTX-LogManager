@@ -57,6 +57,14 @@ function ColorUi:onDeleteLogsPressed()
                 filesToDelete = concat(filesToDelete, self.logFiles:getAllButLast(m))
             end
         end
+    elseif deleteOption == self.uiModel.OPTION_KEEP_TODAY then
+        if selectedModel then
+            filesToDelete = concat(filesToDelete, self.logFiles:getAllButToday(selectedModel))
+        else -- ALl models
+            for _,m in pairs(self.logFiles:getModels()) do
+                filesToDelete = concat(filesToDelete, self.logFiles:getAllButToday(m))
+            end
+        end
     elseif deleteOption == self.uiModel.OPTION_KEEP_LATEST_DATE then
         if selectedModel then
             filesToDelete = concat(filesToDelete, self.logFiles:getAllButLastDate(selectedModel))

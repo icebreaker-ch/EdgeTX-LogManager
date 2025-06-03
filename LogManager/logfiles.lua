@@ -144,4 +144,16 @@ function LogFiles:getAllButLast(modelName)
     return logs
 end
 
+function LogFiles:getAllButToday(modelName)
+    local logs = {}
+    local today = getDateTime()
+    local date = string.format("%04d-%02d-%02d", today.year, today.mon, today.day)
+    for _,v in pairs(self.map[modelName]) do
+        if v:getDate() ~= date then
+            append(logs, v)
+        end
+    end
+    return logs
+end
+
 return LogFiles
