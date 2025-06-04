@@ -152,52 +152,32 @@ local function concat(table1, table2)
     return table1
 end
 
-function BwUi:deleteLogs(model, action)
+function BwUi:getFilesToDelete()
     local filesToDelete = {}
+    local selectedModel = self.uiModel:getSelectedModel()
+    local deleteOption = self.uiModel:getDeleteOption()
 
-    if action == self.uiModel.OPTION_DELETE_EMPTY_LOGS then
-        if model then   
-            filesToDelete = self.logFiles:getEmptyLogsForModel(model)
-        else -- All models
-            for _,m in pairs(self.logFiles:getModels()) do
-                filesToDelete = concat(filesToDelete, self.logFiles:getEmptyLogsForModel(m))
-            end
-        end
-    elseif action == self.uiModel.OPTION_DELETE_ALL then
-        filesToDelete = self.logFiles:getLogs(model)
-    elseif action == self.uiModel.OPTION_KEEP_TODAY then
-        if model then
-            filesToDelete = concat(filesToDelete, self.logFiles:getAllButToday(model))
-        else -- All models
-            for _,m in pairs(self.logFiles:getModels()) do
-                filesToDelete = concat(filesToDelete, self.logFiles:getAllButToday(m))
-            end
-        end
-    elseif action == self.uiModel.OPTION_KEEP_LAST_FLIGHT then
-        if model then
-            filesToDelete = concat(filesToDelete, self.logFiles:getAllButLast(model))
-        else -- All models
-            for _,m in pairs(self.logFiles:getModels()) do
-                filesToDelete = concat(filesToDelete, self.logFiles:getAllButLast(m))
-            end
-        end
-    elseif action == self.uiModel.OPTION_KEEP_LATEST_DATE then
-        if model then
-            filesToDelete = concat(filesToDelete, self.logFiles:getAllButLastDate(model))
-        else -- ALl models
-            for _,m in pairs(self.logFiles:getModels()) do
-                filesToDelete = concat(filesToDelete, self.logFiles:getAllButLastDate(m))
-            end
-        end
+    if deleteOption == self.uiModel.OPTION_DELETE_EMPTY_LOGS then
+        filesToDelete = self.logFiles:filter({modelName = selectedModel, size = 0})
+    elseif deleteOption == self.uiModel.OPTION_DELETE_ALL then
+        filesToDelete = self.logFiles:filter({modelName = selectedModel})
+    elseif deleteOption == self.uiModel.OPTION_KEEP_LAST_FLIGHT then
+        filesToDelete = self.logFiles:filter({modelName = selectedModel, keepLastFlight = true})
+    elseif deleteOption == self.uiModel.OPTION_KEEP_TODAY then
+        filesToDelete = self.logFiles:filter({modelName = selectedModel, keepToday = true})
+    elseif deleteOption == self.uiModel.OPTION_KEEP_LATEST_DATE then
+        filesToDelete = self.logFiles:filter({modelName = selectedModel, keepLastDay = true})
     end
+    return filesToDelete
+end
 
+function BwUi:deleteLogs(model, action)
+    local filesToDelete = self:getFilesToDelete()
     self.deletedFiles = self.logFiles:delete(filesToDelete)
 end
 
 function BwUi:handleExecuting(event)
-    local model = self.uiModel:getSelectedModel()
-    local deleteOption = self.uiModel:getDeleteOption()
-    self:deleteLogs(model, deleteOption)
+    self:deleteLogs()
     self.logFiles:read()
     self.uiModel:update(self.logFiles)
     state = STATE_REPORT

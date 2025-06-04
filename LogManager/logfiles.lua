@@ -2,9 +2,10 @@
 local LogFile = loadfile("/SCRIPTS/TOOLS/LogManager/logfile.lua")()
 
 local LOG_DIR = "/LOGS"
+local LOGFILE_PATTERN = "(.*)%-(%d%d%d%d%-%d%d%-%d%d)%-(%d%d%d%d%d%d)%.csv$"
 
-local function append(logs, log)
-    logs[#logs + 1] = log
+local function append(table, entry)
+    table[#table + 1] = entry
 end
 
 
@@ -92,68 +93,42 @@ function LogFiles:getLogs(--[[opt]]model)
     return logs
 end
 
-function LogFiles:getEmptyLogsForModel(modelName)
-    local logs = {}
-    for _,v in pairs(self.map[modelName]) do
-        if v:getSize() == 0 then
-            append(logs, v)
+function LogFiles:getLastFlights()
+    local result = {}
+    for m,v in pairs(self.map) do
+        for _,l in pairs(self.map[m]) do
+            if not result[m] or l:getFileName() > result[m]:getFileName() then
+                result[m] = l
+            end
         end
     end
-    return logs
+    return result
 end
 
-function LogFiles:getLastForModel(modelName)
-    local last = nil
-    for _,v in pairs(self.map[modelName]) do
-        if not last or last:getFileName() < v:getFileName() then
-            last = v
-        end
+function LogFiles:filter(filterSpec)
+    local lastFlights
+    if filterSpec.keepLastFlight or filterSpec.keepLastDay then
+        lastFlights = self:getLastFlights()
     end
-    return last
-end
 
-function LogFiles:getLastDateForModel(modelName)
-    local lastDate = nil
-    for _,v in pairs(self.map[modelName]) do
-        if not lastDate or lastDate < v:getDate() then
-            lastDate = v:getDate()
-        end
-    end
-    return lastDate
-end
+    local now = getDateTime()
+    local today = string.format("%04d-%02d-%02d", now.year, now.mon, now.day)
 
-function LogFiles:getAllButLastDate(modelName)
-    local logs = {}
-    local lastDate = self:getLastDateForModel(modelName);
-    for _,v in pairs(self.map[modelName]) do
-        if v:getDate() < lastDate then
-            append(logs, v)
-        end
-    end
-    return logs
-end
 
-function LogFiles:getAllButLast(modelName)
-    local logs = {}
-    local last = self:getLastForModel(modelName)
-    for _,v in pairs(self.map[modelName]) do
-        if v:getFileName() ~= last:getFileName() then
-            append(logs, v)
+    local result = {}
+    local logs = self:getLogs()
+    for _,l in pairs(logs) do
+        local fileName = l:getFileName()
+        local modelName, date, time = string.match(fileName, LOGFILE_PATTERN)
+        if (not filterSpec.modelName or modelName == filterSpec.modelName) and
+        (not filterSpec.keepToday or date ~= today) and
+        (not filterSpec.size or filterSpec.size == l:getSize()) and
+        (not filterSpec.keepLastFlight or fileName ~= lastFlights[modelName]:getFileName()) and
+        (not filterSpec.keepLastDay or date ~= lastFlights[modelName]:getDate()) then
+            result[#result + 1] = l
         end
     end
-    return logs
-end
-
-function LogFiles:getAllButToday(modelName)
-    local logs = {}
-    local today = getDateTime()
-    local date = string.format("%04d-%02d-%02d", today.year, today.mon, today.day)
-    for _,v in pairs(self.map[modelName]) do
-        if v:getDate() ~= date then
-            append(logs, v)
-        end
-    end
-    return logs
+    return result
 end
 
 return LogFiles

@@ -24,39 +24,15 @@ function ColorUi:getFilesToDelete()
     local deleteOption = self.uiModel:getDeleteOption()
 
     if deleteOption == self.uiModel.OPTION_DELETE_EMPTY_LOGS then
-        if selectedModel then
-            filesToDelete = self.logFiles:getEmptyLogsForModel(selectedModel)
-        else -- All models
-            for _,m in pairs(self.logFiles:getModels()) do
-                filesToDelete = concat(filesToDelete, self.logFiles:getEmptyLogsForModel(m))
-            end
-        end
+        filesToDelete = self.logFiles:filter({modelName = selectedModel, size = 0})
     elseif deleteOption == self.uiModel.OPTION_DELETE_ALL then
-        filesToDelete = self.logFiles:getLogs(selectedModel)
+        filesToDelete = self.logFiles:filter({modelName = selectedModel})
     elseif deleteOption == self.uiModel.OPTION_KEEP_LAST_FLIGHT then
-        if selectedModel then
-            filesToDelete = concat(filesToDelete, self.logFiles:getAllButLast(selectedModel))
-        else -- All models
-            for _,m in pairs(self.logFiles:getModels()) do
-                filesToDelete = concat(filesToDelete, self.logFiles:getAllButLast(m))
-            end
-        end
+        filesToDelete = self.logFiles:filter({modelName = selectedModel, keepLastFlight = true})
     elseif deleteOption == self.uiModel.OPTION_KEEP_TODAY then
-        if selectedModel then
-            filesToDelete = concat(filesToDelete, self.logFiles:getAllButToday(selectedModel))
-        else -- ALl models
-            for _,m in pairs(self.logFiles:getModels()) do
-                filesToDelete = concat(filesToDelete, self.logFiles:getAllButToday(m))
-            end
-        end
+        filesToDelete = self.logFiles:filter({modelName = selectedModel, keepToday = true})
     elseif deleteOption == self.uiModel.OPTION_KEEP_LATEST_DATE then
-        if selectedModel then
-            filesToDelete = concat(filesToDelete, self.logFiles:getAllButLastDate(selectedModel))
-        else -- ALl models
-            for _,m in pairs(self.logFiles:getModels()) do
-                filesToDelete = concat(filesToDelete, self.logFiles:getAllButLastDate(m))
-            end
-        end
+        filesToDelete = self.logFiles:filter({modelName = selectedModel, keepLastDay = true})
     end
     return filesToDelete
 end
