@@ -15,6 +15,8 @@ the b/w version can be used on color radios with older versions of EdgeTX.
 
 ## Actions
 The following actions can be executed:
+- Delete all empty logs
+- Keep all logs recorded today
 - Keep latest date: Keeps all log files for the latest flying day for the selcted model(s).
 - Keep last flight: Keeps the latest log file for the selected model(s)
 - Delete all Logs: Deletes all log files found for the selected model(s)
