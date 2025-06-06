@@ -13,6 +13,13 @@ function Selector.new(values, index)
     return self
 end
 
+-- Notify observer
+function Selector:notify()
+    if self.onChange then
+        self.onChange(self.index)
+    end
+end
+
 function Selector:setOnChange(f)
     self.onChange = f
 end
@@ -23,6 +30,7 @@ end
 
 function Selector:setIndex(index)
     self.index = index
+    self:notify()
 end
 
 function Selector:setState(newState)
@@ -54,18 +62,14 @@ end
 function Selector:incValue()
     if self.index < #self.values then
         self.index = self.index + 1
-        if self.onChange then
-            self.onChange(self.index)
-        end
+        self:notify()
     end
 end
 
 function Selector:decValue()
     if self.index > 1 then
         self.index = self.index - 1
-        if self.onChange then
-            self.onChange(self.index)
-        end
+        self:notify()
     end
 end
 

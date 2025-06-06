@@ -18,11 +18,23 @@ function ColorUi.new(uiModel, logFiles)
     return self
 end
 
-function ColorUi:updateLogCount()
-    local logFileCount
+function ColorUi:getFilesToDelete()
+    local filesToDelete = {}
     local selectedModel = self.uiModel:getSelectedModel()
-    logFileCount = self.logFiles:getFileCount(selectedModel)
-    self.labelLogCount:set({text = logFileCount .. " Logfiles"})
+    local deleteOption = self.uiModel:getDeleteOption()
+
+    if deleteOption == self.uiModel.OPTION_DELETE_EMPTY_LOGS then
+        filesToDelete = self.logFiles:filter({modelName = selectedModel, size = 0})
+    elseif deleteOption == self.uiModel.OPTION_DELETE_ALL then
+        filesToDelete = self.logFiles:filter({modelName = selectedModel})
+    elseif deleteOption == self.uiModel.OPTION_KEEP_LAST_FLIGHT then
+        filesToDelete = self.logFiles:filter({modelName = selectedModel, keepLastFlight = true})
+    elseif deleteOption == self.uiModel.OPTION_KEEP_TODAY then
+        filesToDelete = self.logFiles:filter({modelName = selectedModel, keepToday = true})
+    elseif deleteOption == self.uiModel.OPTION_KEEP_LATEST_DATE then
+        filesToDelete = self.logFiles:filter({modelName = selectedModel, keepLastDay = true})
+    end
+    return filesToDelete
 end
 
 function ColorUi:onConfirm(filesToDelete)
@@ -34,50 +46,24 @@ function ColorUi:onConfirm(filesToDelete)
 end
 
 function ColorUi:onDeleteLogsPressed()
+    local filesToDelete = self:getFilesToDelete()
 
-    local filesToDelete = {}
+    lvgl.confirm({title = "Delete",
+                  message = "Really delete " .. #filesToDelete .. " files?",
+                  confirm = function() return self:onConfirm(filesToDelete) end})
+end
+
+function ColorUi:updateUi()
     local selectedModel = self.uiModel:getSelectedModel()
-    local deleteOption = self.uiModel:getDeleteOption()
+    local logFileCount = self.logFiles:getFileCount(selectedModel)
+    self.labelLogCount:set({text = logFileCount .. " Logfiles"})
 
-    if deleteOption == self.uiModel.OPTION_DELETE_EMPTY_LOGS then
-        if selectedModel then
-            filesToDelete = self.logFiles:getEmptyLogsForModel(selectedModel)
-        else -- All models
-            for _,m in pairs(self.logFiles:getModels()) do
-                filesToDelete = concat(filesToDelete, self.logFiles:getEmptyLogsForModel(m))
-            end
-        end
-    elseif deleteOption == self.uiModel.OPTION_DELETE_ALL then
-        filesToDelete = self.logFiles:getLogs(selectedModel)
-    elseif deleteOption == self.uiModel.OPTION_KEEP_LAST_FLIGHT then
-        if selectedModel then
-            filesToDelete = concat(filesToDelete, self.logFiles:getAllButLast(selectedModel))
-        else -- All models
-            for _,m in pairs(self.logFiles:getModels()) do
-                filesToDelete = concat(filesToDelete, self.logFiles:getAllButLast(m))
-            end
-        end
-    elseif deleteOption == self.uiModel.OPTION_KEEP_LATEST_DATE then
-        if selectedModel then
-            filesToDelete = concat(filesToDelete, self.logFiles:getAllButLastDate(selectedModel))
-        else -- ALl models
-            for _,m in pairs(self.logFiles:getModels()) do
-                filesToDelete = concat(filesToDelete, self.logFiles:getAllButLastDate(m))
-            end
-        end
-    end
-
-    if #filesToDelete > 0 then
-        lvgl.confirm({title = "Delete",
-                      message = "Really delete " .. #filesToDelete .. " files?",
-                      confirm = function() return self:onConfirm(filesToDelete) end})
-    else
-        lvgl.message({title = "Message", message = "No files to delete", details = "Press RTN to continue"})
-    end
+    local filesToDelete = self:getFilesToDelete()
+    self.labelDeleteCount:set({text = "Delete " .. #filesToDelete .. "/" .. logFileCount})
 end
 
 function ColorUi:redraw()
-    local COL = { 10, 150, 300 }
+    local LEFT = 10
     local ROW = { 10, 40, 80, 180 }
 
     lvgl.clear();
@@ -87,34 +73,37 @@ function ColorUi:redraw()
     local fileCount = self.logFiles:getFileCount()
     local modelCount = self.logFiles:getModelCount()
 
-    page:label({x=COL[1], y = ROW[1],
+    page:label({x = LEFT, y = ROW[1],
             text = "Found " .. fileCount .. " logfiles for " .. modelCount .. " models"})
 
-    page:label({x = COL[1], y = ROW[2], text = "Select Model(s):"})
-    page:choice({x = COL[2], y = ROW[2],
-        title = "Model",
+    local modelBox = page:box({x = LEFT, y = ROW[2], flexFlow = lvgl.FLOW_ROW, flexPad = lvgl.PAD_LARGE})
+    modelBox:label({text = "Select Model(s):"})
+    modelBox:choice({title = "Model",
         get = function() return self.uiModel:getModelOption() end,
         set = function(index) return self.uiModel:setModelOption(index) end,
         values = self.uiModel:getModelOptions()})
-    local logFileCount = 0
-    self.labelLogCount = page:label({x = COL[3], y= ROW[2]})
-    self:updateLogCount()
+    self.labelLogCount = modelBox:label({})
 
-    page:label({x = COL[1], y = ROW[3], text = "Select Logfiles:"})
-    page:choice({x = COL[2], y = ROW[3],
-        title = "Action",
+    local logFilesBox = page:box({x = LEFT, y = ROW[3], flexFlow = lvgl.FLOW_ROW, flexPad = lvgl.PAD_LARGE})
+    logFilesBox:label({text = "Select Logfiles:"})
+    logFilesBox:choice({title = "Action",
         get = function() return self.uiModel:getDeleteOption() end,
         set = function(index) return self.uiModel:setDeleteOption(index) end,
         values = self.uiModel.deleteOptions})
+    self.labelDeleteCount = logFilesBox:label({})
 
-    local box = page:box({x = COL[1], y = ROW[4], flexFlow = lvgl.FLOW_ROW, flexPad = 20})
-    box:button({w = 100, text = "Exit", press = function() self.exitCode = 1 end})
-    box:button({w = 100, text = "Delete Logs", press = function() self:onDeleteLogsPressed() end})
+    local buttonBox = page:box({x = LEFT, y = ROW[4], flexFlow = lvgl.FLOW_ROW, flexPad = lvgl.PAD_LARGE})
+    buttonBox:button({w = 100, text = "Exit", press = function() self.exitCode = 1 end})
+    buttonBox:button({w = 100, text = "Delete Logs",
+        press = function() self:onDeleteLogsPressed() end,
+        active = function() return #self:getFilesToDelete() > 0 end})
+
+    self:updateUi()
 end
 
 function ColorUi:update(change)    
     if change == self.uiModel.SELECTION_CHANGED then
-        self:updateLogCount()
+        self:updateUi()
         self.uiModel:resetChanged()
     elseif change == self.uiModel.LOGFILES_CHANGED then
         self:redraw()

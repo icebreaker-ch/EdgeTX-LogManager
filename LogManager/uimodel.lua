@@ -3,10 +3,12 @@ local UiModel = {}
 UiModel.__index = UiModel
 
 UiModel.OPTION_ALL_MODELS = 1
+
 UiModel.OPTION_DELETE_EMPTY_LOGS = 1
-UiModel.OPTION_KEEP_LATEST_DATE = 2
-UiModel.OPTION_KEEP_LAST_FLIGHT = 3
-UiModel.OPTION_DELETE_ALL = 4
+UiModel.OPTION_KEEP_TODAY = 2
+UiModel.OPTION_KEEP_LATEST_DATE = 3
+UiModel.OPTION_KEEP_LAST_FLIGHT = 4
+UiModel.OPTION_DELETE_ALL = 5
 
 UiModel.NO_CHANGE = 0
 UiModel.SELECTION_CHANGED = 1
@@ -17,7 +19,7 @@ function UiModel.new()
     local self = setmetatable({}, UiModel)
     self.modelOptions = {}
     self.selectedModelOption = 1
-    self.deleteOptions = {"Delete empty logs", "Keep latest date", "Keep last flight", "Delete all Logs" }
+    self.deleteOptions = {"Delete empty logs", "Keep today", "Keep latest date", "Keep last flight", "Delete all Logs" }
     self.selectedDeleteOption = 1
     self.changed = UiModel.NO_CHANGE
     return self

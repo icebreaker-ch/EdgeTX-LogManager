@@ -1,17 +1,19 @@
 -- Class LogFile
 local LogFile = {}
 LogFile.__index = LogFile
+-- pattern modelName, date, time
+LogFile.pattern = "(.*)%-(%d%d%d%d%-%d%d%-%d%d)%-(%d%d%d%d%d%d)%.csv$"
 
 function LogFile.new(fileName, info)
     local self = setmetatable({}, LogFile)
     self.fileName = fileName
     self.info = info
-    self.modelName = string.sub(fileName, 1, #fileName - 22)
+    self.modelName, self.date, self.time = string.match(fileName, self.pattern)
     return self
 end
 
 function LogFile.isLogFile(fname)
-    return string.sub(fname, #fname -3, #fname) == ".csv"
+    return string.match(fname, LogFile.pattern)
 end
 
 function LogFile:getModelName()
@@ -23,7 +25,7 @@ function LogFile:getFileName()
 end
 
 function LogFile:getDate()
-    return string.sub(self.fileName, #self.fileName - 20, #self.fileName - 11)
+    return self.date
 end
 
 function LogFile:getSize()
