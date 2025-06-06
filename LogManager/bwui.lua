@@ -24,9 +24,6 @@ function BwUi.new(uiModel, logFiles)
     self.state = STATE_IDLE
     self.deletedFiles = 0
     self.modelSelector = Selector.new()
-    self.actionSelector = Selector.new({"Delete empty", "Keep today", "Keep latest date", "Keep last flight", "Delete all" }, 1)
-
-    self.actionSelector:setOnChange(function(index) uiModel:setDeleteOption(index) end)
     self.modelSelector:setOnChange(function(index) uiModel:setModelOption(index) end)
     self.actionSelector = Selector.new(uiModel.deleteOptions, 1)
     self.actionSelector:setOnChange(function(index) uiModel:setDeleteOption(index) end)
@@ -210,28 +207,6 @@ function BwUi:getFilesToDelete()
     return filesToDelete
 end
 
-<<<<<<< HEAD
-=======
-function BwUi:getFilesToDelete()
-    local filesToDelete = {}
-    local selectedModel = self.uiModel:getSelectedModel()
-    local deleteOption = self.uiModel:getDeleteOption()
-
-    if deleteOption == self.uiModel.OPTION_DELETE_EMPTY_LOGS then
-        filesToDelete = self.logFiles:filter({modelName = selectedModel, size = 0})
-    elseif deleteOption == self.uiModel.OPTION_DELETE_ALL then
-        filesToDelete = self.logFiles:filter({modelName = selectedModel})
-    elseif deleteOption == self.uiModel.OPTION_KEEP_LAST_FLIGHT then
-        filesToDelete = self.logFiles:filter({modelName = selectedModel, keepLastFlight = true})
-    elseif deleteOption == self.uiModel.OPTION_KEEP_TODAY then
-        filesToDelete = self.logFiles:filter({modelName = selectedModel, keepToday = true})
-    elseif deleteOption == self.uiModel.OPTION_KEEP_LATEST_DATE then
-        filesToDelete = self.logFiles:filter({modelName = selectedModel, keepLastDay = true})
-    end
-    return filesToDelete
-end
-
->>>>>>> ac8fc267d619dd3e98aa9b288b19e835b21d783a
 function BwUi:deleteLogs(model, action)
     local filesToDelete = self:getFilesToDelete()
     self.deletedFiles = self.logFiles:delete(filesToDelete)
