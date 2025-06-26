@@ -42,7 +42,7 @@ function ColorUi:onConfirm(filesToDelete)
     self.logFiles:read()
     self.uiModel:update(self.logFiles)
     self.uiModel:setModelOption(self.uiModel.OPTION_ALL_MODELS)
-    self.uiModel:setChanged(self.uiModel.LOGFILES_CHANGED)
+    self.uiModel:setChanged(self.uiModel.CHANGE.LOGFILES)
 end
 
 function ColorUi:onDeleteLogsPressed()
@@ -102,10 +102,10 @@ function ColorUi:redraw()
 end
 
 function ColorUi:update(change)    
-    if change == self.uiModel.SELECTION_CHANGED then
+    if change == self.uiModel.CHANGE.SELECTION then
         self:updateUi()
         self.uiModel:resetChanged()
-    elseif change == self.uiModel.LOGFILES_CHANGED then
+    elseif change == self.uiModel.CHANGE.LOGFILES then
         self:redraw()
         self.uiModel:resetChanged()
     end
@@ -121,7 +121,7 @@ end
 function ColorUi:run(event, touchState)
     if lvgl then
         local change = self.uiModel:getChanged()
-        if change ~= self.uiModel.NO_CHANGE then
+        if change ~= self.uiModel.CHANGE.NONE then
             self:update(change)
         end
     else
