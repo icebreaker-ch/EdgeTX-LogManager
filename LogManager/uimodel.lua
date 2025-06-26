@@ -25,7 +25,7 @@ UiModel.CHANGE = {
 function UiModel.new()
     local self = setmetatable({}, UiModel)
     self.modelOptions = {}
-    self.selectedModelOption = 1
+    self.selectedModelOption = UiModel.OPTION_ALL_MODELS
     self.deleteOptions = {
         [UiModel.DELETE_OPTION.DELETE_EMPTY_LOGS] = "Delete empty logs",
         [UiModel.DELETE_OPTION.KEEP_TODAY] = "Keep today",
@@ -37,7 +37,7 @@ function UiModel.new()
         [UiModel.DELETE_OPTION.DELETE_LT_100K] = "Delete Logs<100kB",
         [UiModel.DELETE_OPTION.DELETE_ALL] = "Delete all Logs"
     }
-    self.selectedDeleteOption = 1
+    self.selectedDeleteOption = UiModel.DELETE_OPTION.DELETE_EMPTY_LOGS
     self.changed = UiModel.CHANGE.NONE
     return self
 end
