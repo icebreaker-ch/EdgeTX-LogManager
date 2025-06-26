@@ -1,15 +1,19 @@
 local Selector = loadfile("/SCRIPTS/TOOLS/LogManager/selector.lua")()
 
+local VERSION_STRING = "v0.4.0"
+
 local LOG_DIR = "/LOGS"
 
-local STATE_IDLE = 0
-local STATE_CHOICE_MODEL_SELECTED = 1
-local STATE_CHOICE_ACTION_SELECTED = 2
-local STATE_CHOICE_MODEL_EDITING = 3
-local STATE_CHOICE_ACTION_EDITING = 4
-local STATE_EXECUTING = 5
-local STATE_REPORT = 6
-local STATE_DONE = 7
+local STATE = {
+    IDLE = 0,
+    CHOICE_MODEL_SELECTED = 1,
+    CHOICE_ACTION_SELECTED = 2,
+    CHOICE_MODEL_EDITING = 3,
+    CHOICE_ACTION_EDITING = 4,
+    EXECUTING = 5,
+    REPORT = 6,
+    DONE = 7
+}
 
 local textWidth
 local textHeight
@@ -21,7 +25,7 @@ function BwUi.new(uiModel, logFiles)
     local self = setmetatable({}, BwUi)
     self.uiModel = uiModel
     self.logFiles = logFiles
-    self.state = STATE_IDLE
+    self.state = STATE.IDLE
     self.deletedFiles = 0
     self.modelSelector = Selector.new()
     self.modelSelector:setOnChange(function(index) uiModel:setModelOption(index) end)
@@ -60,11 +64,14 @@ function BwUi:updateUi()
     local modelCount = self.logFiles:getModelCount()
 
     lcd.drawText(LEFT, y, "LogManager", INVERS)
+    lcd.drawText(LCD_W - #VERSION_STRING * 4, y, VERSION_STRING, SMLSIZE)
+
     y = newLine(y)
-    lcd.drawText(LEFT, y, string.format("%d Log%s for %d Model%s", totalFileCount, s(totalFileCount), modelCount, s(modelCount)))
+    lcd.drawText(LEFT, y,
+        string.format("%d Log%s for %d Model%s", totalFileCount, s(totalFileCount), modelCount, s(modelCount)))
 
     y = newLine(y, 1.5)
-    if self.state == STATE_REPORT then
+    if self.state == STATE.REPORT then
         lcd.drawText(LEFT, y, string.format("Purged %d file%s", self.deletedFiles, s(self.deletedFiles)))
         y = newLine(y)
         lcd.drawText(LEFT, y, "Press RTN")
@@ -85,11 +92,11 @@ function BwUi:updateUi()
         lcd.drawText(LEFT, y, string.format("Selected: %d/%d file%s", deleteCount, modelFileCount, s(modelFileCount)))
 
         local statusLine
-        if self.state == STATE_CHOICE_MODEL_EDITING then
-            statusLine = "Select model"     
-        elseif self.state == STATE_CHOICE_ACTION_EDITING then
+        if self.state == STATE.CHOICE_MODEL_EDITING then
+            statusLine = "Select model"
+        elseif self.state == STATE.CHOICE_ACTION_EDITING then
             statusLine = "Select action"
-        elseif self.state == STATE_EXECUTING then
+        elseif self.state == STATE.EXECUTING then
             statusLine = "Executing..."
         elseif deleteCount == 0 then
             statusLine = "No files to delete"
@@ -105,10 +112,10 @@ end
 
 function BwUi:handleIdle(event)
     if event == EVT_VIRTUAL_NEXT then
-        self.modelSelector:setState(Selector.STATE_SELECTED)
-        self.state = STATE_CHOICE_MODEL_SELECTED
+        self.modelSelector:setState(Selector.STATE.SELECTED)
+        self.state = STATE.CHOICE_MODEL_SELECTED
     elseif event == EVT_VIRTUAL_ENTER_LONG and #self:getFilesToDelete() > 0 then
-        self.state = STATE_EXECUTING
+        self.state = STATE.EXECUTING
     end
     self:updateUi()
     return 0
@@ -116,15 +123,15 @@ end
 
 function BwUi:handleChoiceModelSelected(event)
     if event == EVT_VIRTUAL_ENTER then
-        self.modelSelector:setState(Selector.STATE_EDITING)
-        self.state = STATE_CHOICE_MODEL_EDITING
+        self.modelSelector:setState(Selector.STATE.EDITING)
+        self.state = STATE.CHOICE_MODEL_EDITING
     elseif event == EVT_VIRTUAL_NEXT or event == EVT_VIRTUAL_PREV then
-        self.modelSelector:setState(Selector.STATE_IDLE)
-        self.actionSelector:setState(Selector.STATE_SELECTED)
-        self.state = STATE_CHOICE_ACTION_SELECTED
+        self.modelSelector:setState(Selector.STATE.IDLE)
+        self.actionSelector:setState(Selector.STATE.SELECTED)
+        self.state = STATE.CHOICE_ACTION_SELECTED
     elseif event == EVT_VIRTUAL_ENTER_LONG and #self:getFilesToDelete() > 0 then
-        self.modelSelector:setState(Selector.STATE_IDLE)
-        self.state = STATE_EXECUTING
+        self.modelSelector:setState(Selector.STATE.IDLE)
+        self.state = STATE.EXECUTING
     end
     self:updateUi()
     return 0
@@ -136,8 +143,8 @@ function BwUi:handleChoiceModelEditing(event)
     elseif event == EVT_VIRTUAL_PREV then
         self.modelSelector:decValue()
     elseif event == EVT_VIRTUAL_ENTER then
-        self.modelSelector:setState(Selector.STATE_SELECTED)
-        self.state = STATE_CHOICE_MODEL_SELECTED
+        self.modelSelector:setState(Selector.STATE.SELECTED)
+        self.state = STATE.CHOICE_MODEL_SELECTED
     end
     self:updateUi()
     return 0
@@ -145,15 +152,15 @@ end
 
 function BwUi:handleChoiceActionSelected(event)
     if event == EVT_VIRTUAL_ENTER then
-        self.actionSelector:setState(Selector.STATE_EDITING)
-        self.state = STATE_CHOICE_ACTION_EDITING
+        self.actionSelector:setState(Selector.STATE.EDITING)
+        self.state = STATE.CHOICE_ACTION_EDITING
     elseif event == EVT_VIRTUAL_NEXT or event == EVT_VIRTUAL_PREV then
-        self.actionSelector:setState(Selector.STATE_IDLE)
-        self.modelSelector:setState(Selector.STATE_SELECTED)
-        self.state = STATE_CHOICE_MODEL_SELECTED
+        self.actionSelector:setState(Selector.STATE.IDLE)
+        self.modelSelector:setState(Selector.STATE.SELECTED)
+        self.state = STATE.CHOICE_MODEL_SELECTED
     elseif event == EVT_VIRTUAL_ENTER_LONG then
-        self.actionSelector:setState(Selector.STATE_IDLE)
-        self.state = STATE_EXECUTING
+        self.actionSelector:setState(Selector.STATE.IDLE)
+        self.state = STATE.EXECUTING
     end
     self:updateUi()
     return 0
@@ -165,8 +172,8 @@ function BwUi:handleChoiceActionEditing(event)
     elseif event == EVT_VIRTUAL_PREV then
         self.actionSelector:decValue()
     elseif event == EVT_VIRTUAL_ENTER then
-        self.actionSelector:setState(Selector.STATE_IDLE)
-        self.state = STATE_CHOICE_ACTION_SELECTED
+        self.actionSelector:setState(Selector.STATE.IDLE)
+        self.state = STATE.CHOICE_ACTION_SELECTED
     end
     self:updateUi()
     return 0
@@ -174,7 +181,7 @@ end
 
 function BwUi:handleReport(event)
     if event == EVT_EXIT_BREAK then
-        self.state = STATE_DONE
+        self.state = STATE.DONE
     else
         self:updateUi()
     end
@@ -184,7 +191,7 @@ end
 function BwUi:handleDone(event)
     self:reload()
     self:updateUi()
-    self.state = STATE_IDLE
+    self.state = STATE.IDLE
     return 0
 end
 
@@ -192,16 +199,23 @@ function BwUi:getFilesToDelete()
     local filesToDelete = {}
     local selectedModel = self.uiModel:getSelectedModel()
     local deleteOption = self.uiModel:getDeleteOption()
-
-    if deleteOption == self.uiModel.OPTION_DELETE_EMPTY_LOGS then
+    if deleteOption == self.uiModel.DELETE_OPTION.DELETE_EMPTY_LOGS then
         filesToDelete = self.logFiles:filter({ modelName = selectedModel, size = 0 })
-    elseif deleteOption == self.uiModel.OPTION_DELETE_ALL then
+    elseif deleteOption == self.uiModel.DELETE_OPTION.DELETE_ALL then
         filesToDelete = self.logFiles:filter({ modelName = selectedModel })
-    elseif deleteOption == self.uiModel.OPTION_KEEP_LAST_FLIGHT then
+    elseif deleteOption == self.uiModel.DELETE_OPTION.KEEP_LAST_FLIGHT then
         filesToDelete = self.logFiles:filter({ modelName = selectedModel, keepLastFlight = true })
-    elseif deleteOption == self.uiModel.OPTION_KEEP_TODAY then
+    elseif deleteOption == self.uiModel.DELETE_OPTION.KEEP_TODAY then
         filesToDelete = self.logFiles:filter({ modelName = selectedModel, keepToday = true })
-    elseif deleteOption == self.uiModel.OPTION_KEEP_LATEST_DATE then
+    elseif deleteOption == self.uiModel.DELETE_OPTION.DELETE_LT_10K then
+        filesToDelete = self.logFiles:filter({ modelName = selectedModel, maxSize = 10000 })
+    elseif deleteOption == self.uiModel.DELETE_OPTION.DELETE_LT_20K then
+        filesToDelete = self.logFiles:filter({ modelName = selectedModel, maxSize = 20000 })
+    elseif deleteOption == self.uiModel.DELETE_OPTION.DELETE_LT_50K then
+        filesToDelete = self.logFiles:filter({ modelName = selectedModel, maxSize = 50000 })
+    elseif deleteOption == self.uiModel.DELETE_OPTION.DELETE_LT_100K then
+        filesToDelete = self.logFiles:filter({ modelName = selectedModel, maxSize = 100000 })
+    elseif deleteOption == self.uiModel.DELETE_OPTION.KEEP_LATEST_DATE then
         filesToDelete = self.logFiles:filter({ modelName = selectedModel, keepLastDay = true })
     end
     return filesToDelete
@@ -216,7 +230,7 @@ function BwUi:handleExecuting(event)
     self:deleteLogs()
     self.logFiles:read()
     self.uiModel:update(self.logFiles)
-    self.state = STATE_REPORT
+    self.state = STATE.REPORT
     return 0
 end
 
@@ -225,29 +239,29 @@ function BwUi:reload()
     self.uiModel:update(self.logFiles)
     self.modelSelector:setValues(self.uiModel:getModelOptions())
     self.modelSelector:setIndex(1)
-    self.modelSelector:setState(Selector.STATE_IDLE)
+    self.modelSelector:setState(Selector.STATE.IDLE)
 
     self.actionSelector:setIndex(1)
-    self.actionSelector:setState(Selector.STATE_IDLE)
+    self.actionSelector:setState(Selector.STATE.IDLE)
 end
 
 function BwUi:run(event)
     local result = 0
-    if self.state == STATE_IDLE then
+    if self.state == STATE.IDLE then
         result = self:handleIdle(event)
-    elseif self.state == STATE_CHOICE_MODEL_SELECTED then
+    elseif self.state == STATE.CHOICE_MODEL_SELECTED then
         result = self:handleChoiceModelSelected(event)
-    elseif self.state == STATE_CHOICE_MODEL_EDITING then
+    elseif self.state == STATE.CHOICE_MODEL_EDITING then
         result = self:handleChoiceModelEditing(event)
-    elseif self.state == STATE_CHOICE_ACTION_SELECTED then
+    elseif self.state == STATE.CHOICE_ACTION_SELECTED then
         result = self:handleChoiceActionSelected(event)
-    elseif self.state == STATE_CHOICE_ACTION_EDITING then
+    elseif self.state == STATE.CHOICE_ACTION_EDITING then
         result = self:handleChoiceActionEditing(event)
-    elseif self.state == STATE_EXECUTING then
+    elseif self.state == STATE.EXECUTING then
         result = self:handleExecuting(event)
-    elseif self.state == STATE_REPORT then
+    elseif self.state == STATE.REPORT then
         result = self:handleReport(event)
-    elseif self.state == STATE_DONE then
+    elseif self.state == STATE.DONE then
         result = self:handleDone()
     end
     return result

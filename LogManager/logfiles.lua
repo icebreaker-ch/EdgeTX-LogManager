@@ -94,6 +94,7 @@ function LogFiles:filter(filterSpec)
             (not filterSpec.keepToday or date ~= today) and
             (not filterSpec.size or filterSpec.size == log:getSize()) and
             (not filterSpec.keepLastFlight or fileName ~= lastFlights[modelName]:getFileName()) and
+            (not filterSpec.maxSize or log:getSize() <= filterSpec.maxSize) and
             (not filterSpec.keepLastDay or date ~= lastFlights[modelName]:getDate()) then
             append(result, log)
         end

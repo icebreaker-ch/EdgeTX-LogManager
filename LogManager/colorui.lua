@@ -1,11 +1,3 @@
-local function concat(table1, table2)
-    local result = table1
-    for _,v in pairs(table2) do
-        table.insert(table1, v)
-    end
-    return result
-end
-
 -- Class ColorUi
 local ColorUi = {}
 ColorUi.__index = ColorUi
@@ -23,16 +15,24 @@ function ColorUi:getFilesToDelete()
     local selectedModel = self.uiModel:getSelectedModel()
     local deleteOption = self.uiModel:getDeleteOption()
 
-    if deleteOption == self.uiModel.OPTION_DELETE_EMPTY_LOGS then
+    if deleteOption == self.uiModel.DELETE_OPTION.DELETE_EMPTY_LOGS then
         filesToDelete = self.logFiles:filter({modelName = selectedModel, size = 0})
-    elseif deleteOption == self.uiModel.OPTION_DELETE_ALL then
+    elseif deleteOption == self.uiModel.DELETE_OPTION.DELETE_ALL then
         filesToDelete = self.logFiles:filter({modelName = selectedModel})
-    elseif deleteOption == self.uiModel.OPTION_KEEP_LAST_FLIGHT then
+    elseif deleteOption == self.uiModel.DELETE_OPTION.KEEP_LAST_FLIGHT then
         filesToDelete = self.logFiles:filter({modelName = selectedModel, keepLastFlight = true})
-    elseif deleteOption == self.uiModel.OPTION_KEEP_TODAY then
+    elseif deleteOption == self.uiModel.DELETE_OPTION.KEEP_TODAY then
         filesToDelete = self.logFiles:filter({modelName = selectedModel, keepToday = true})
-    elseif deleteOption == self.uiModel.OPTION_KEEP_LATEST_DATE then
+    elseif deleteOption == self.uiModel.DELETE_OPTION.KEEP_LATEST_DATE then
         filesToDelete = self.logFiles:filter({modelName = selectedModel, keepLastDay = true})
+    elseif deleteOption == self.uiModel.DELETE_OPTION.DELETE_LT_10K then
+        filesToDelete = self.logFiles:filter({modelName = selectedModel, maxSize = 10000})
+    elseif deleteOption == self.uiModel.DELETE_OPTION.DELETE_LT_20K then
+        filesToDelete = self.logFiles:filter({modelName = selectedModel, maxSize = 20000})
+    elseif deleteOption == self.uiModel.DELETE_OPTION.DELETE_LT_50K then
+        filesToDelete = self.logFiles:filter({modelName = selectedModel, maxSize = 50000})
+    elseif deleteOption == self.uiModel.DELETE_OPTION.DELETE_LT_100K then
+        filesToDelete = self.logFiles:filter({modelName = selectedModel, maxSize = 100000})
     end
     return filesToDelete
 end

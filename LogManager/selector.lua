@@ -1,15 +1,21 @@
 local Selector = {}
 Selector.__index = Selector
 
-Selector.STATE_IDLE = 0
-Selector.STATE_SELECTED = 1
-Selector.STATE_EDITING = 2
+Selector.STATE = {
+    IDLE = 0,
+    SELECTED = 1,
+    STATE_EDITING = 2
+}
 
 function Selector.new(values, index)
     local self = setmetatable({}, Selector)
-    self.index = index
-    self.values = values
-    self.state = self.STATE_IDLE
+    self.index = index or 1
+    if values and #values > 0 then
+        self.values = values
+    else
+        self.values = {"-"}
+    end
+    self.state = self.STATE.IDLE
     return self
 end
 
@@ -25,7 +31,11 @@ function Selector:setOnChange(f)
 end
 
 function Selector:setValues(values)
-    self.values = values
+    if values and #values > 0 then
+        self.values = values
+    else        
+        self.values = {"-"}
+    end
 end
 
 function Selector:setIndex(index)
@@ -50,11 +60,11 @@ function Selector:getValue()
 end
 
 function Selector:getFlags()
-    if self.state == self.STATE_IDLE then
+    if self.state == self.STATE.IDLE then
         return 0
-    elseif self.state == self.STATE_SELECTED then
+    elseif self.state == self.STATE.SELECTED then
         return INVERS
-    elseif self.state == self.STATE_EDITING then
+    elseif self.state == self.STATE.EDITING then
         return BLINK + INVERS
     end
 end
