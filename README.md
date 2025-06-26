@@ -19,6 +19,7 @@ The following actions can be executed:
 - Keep all logs recorded today
 - Keep latest date: Keeps all log files for the latest flying day for the selcted model(s).
 - Keep last flight: Keeps the latest log file for the selected model(s)
+- Delete small log files with max size of 10 kB, 20 kB, 50 kB or 100 kB
 - Delete all Logs: Deletes all log files found for the selected model(s)
 
 ![actionSelection](https://github.com/user-attachments/assets/9b90d415-8e73-4459-8181-27d91e86c307)
