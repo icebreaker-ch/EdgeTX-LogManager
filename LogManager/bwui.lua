@@ -221,7 +221,7 @@ function BwUi:handleReport(event)
 end
 
 function BwUi:handleDone(event)
-    self:reload()
+    self:init()
     self:updateUi()
     self.state = STATE.IDLE
     return 0
@@ -253,11 +253,6 @@ function BwUi:getFilesToDelete()
     return filesToDelete
 end
 
-function BwUi:deleteLogs(model, action)
-    local filesToDelete = self:getFilesToDelete()
-    self.deletedFiles = self.logFiles:delete(filesToDelete)
-end
-
 function BwUi:handleExecuting(event)
     if self.deletePos <= #self.deleteQueue then
         self:updateUi()
@@ -278,7 +273,7 @@ function BwUi:handleExecuting(event)
     return 0
 end
 
-function BwUi:reload()
+function BwUi:init()
     self.logFiles:read()
     self.uiModel:update(self.logFiles)
     self.modelSelector:setValues(self.uiModel:getModelOptions())

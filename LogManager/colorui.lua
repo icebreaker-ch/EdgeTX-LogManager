@@ -190,10 +190,8 @@ function ColorUi:handleDeleting()
 end
 
 function ColorUi:init()
-    if lvgl ~= nil then
-        self.logFiles:read()
-        self.uiModel:update(self.logFiles)
-    end
+    self.logFiles:read()
+    self.uiModel:update(self.logFiles)
 end
 
 function ColorUi:run(event, touchState)

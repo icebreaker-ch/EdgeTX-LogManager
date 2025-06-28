@@ -37,13 +37,6 @@ function LogFiles:read()
     end
 end
 
-function LogFiles:delete(files)
-    for _, v in pairs(files) do
-        v:delete()
-    end
-    return #files
-end
-
 function LogFiles:getModels()
     local models = {}
     for k, _ in pairs(self.models) do
