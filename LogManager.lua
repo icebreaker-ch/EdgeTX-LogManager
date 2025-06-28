@@ -13,5 +13,5 @@ else
     local BwUi = loadfile("/SCRIPTS/TOOLS/LogManager/bwui.lua")()
     local bwUi = BwUi.new(uiModel, logFiles)
 
-    return {init = function() bwUi:reload() end, run = function(event) return bwUi:run(event) end}
+    return {init = function() bwUi:init() end, run = function(event) return bwUi:run(event) end}
 end
