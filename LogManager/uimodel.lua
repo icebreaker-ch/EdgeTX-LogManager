@@ -16,12 +16,6 @@ UiModel.DELETE_OPTION = {
     DELETE_ALL = 9
 }
 
-UiModel.CHANGE = {
-    NONE = 0,
-    SELECTION = 1,
-    LOGFILES = 2
-}
-
 function UiModel.new()
     local self = setmetatable({}, UiModel)
     self.modelOptions = {}
@@ -38,7 +32,6 @@ function UiModel.new()
         [UiModel.DELETE_OPTION.DELETE_ALL] = "Delete all Logs"
     }
     self.selectedDeleteOption = UiModel.DELETE_OPTION.DELETE_EMPTY_LOGS
-    self.changed = UiModel.CHANGE.NONE
     return self
 end
 
@@ -47,7 +40,6 @@ function UiModel:update(logFiles)
     for _, v in pairs(logFiles:getModels()) do
         self.modelOptions[#self.modelOptions + 1] = v
     end
-    self.changed = UiModel.CHANGE.LOGFILES
 end
 
 function UiModel:getSelectedModel()
@@ -68,7 +60,6 @@ end
 
 function UiModel:setModelOption(index)
     self.selectedModelOption = index
-    self.changed = UiModel.CHANGE.SELECTION
 end
 
 function UiModel:getDeleteOption()
@@ -77,19 +68,6 @@ end
 
 function UiModel:setDeleteOption(index)
     self.selectedDeleteOption = index
-    self.changed = UiModel.CHANGE.SELECTION
-end
-
-function UiModel:getChanged()
-    return self.changed
-end
-
-function UiModel:resetChanged()
-    self.changed = UiModel.CHANGE.NONE
-end
-
-function UiModel:setChanged(changed)
-    self.changed = changed
 end
 
 return UiModel
