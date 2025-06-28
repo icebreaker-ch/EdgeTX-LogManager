@@ -1,6 +1,6 @@
 local Selector = loadfile("/SCRIPTS/TOOLS/LogManager/selector.lua")()
 
-local VERSION_STRING = "v0.4.0"
+local VERSION_STRING = "v0.5.0"
 
 local LOG_DIR = "/LOGS"
 
