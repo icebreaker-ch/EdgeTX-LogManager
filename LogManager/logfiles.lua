@@ -24,7 +24,7 @@ function LogFiles:read()
     for f in dir(LOG_DIR) do
         if LogFile.isLogFile(f) then
             local info = fstat(LOG_DIR .. "/" .. f)
-            local logFile = LogFile.new(f, info)
+            local logFile = LogFile.new(LOG_DIR, f, info)
             local modelName = logFile:getModelName()
             append(self.logFiles, logFile)
             if not self.models[modelName] then
@@ -39,7 +39,7 @@ end
 
 function LogFiles:delete(files)
     for _, v in pairs(files) do
-        del(LOG_DIR .. "/" .. v:getFileName())
+        v:delete()
     end
     return #files
 end

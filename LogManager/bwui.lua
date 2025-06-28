@@ -4,6 +4,8 @@ local VERSION_STRING = "v0.4.0"
 
 local LOG_DIR = "/LOGS"
 
+local DISPLAY_DELAY = 30 -- 300 ms
+
 local STATE = {
     IDLE = 0,
     CHOICE_MODEL_SELECTED = 1,
@@ -27,10 +29,14 @@ function BwUi.new(uiModel, logFiles)
     self.logFiles = logFiles
     self.state = STATE.IDLE
     self.deletedFiles = 0
+    self.deletedBytes = 0
     self.modelSelector = Selector.new()
     self.modelSelector:setOnChange(function(index) uiModel:setModelOption(index) end)
     self.actionSelector = Selector.new(uiModel.deleteOptions, 1)
     self.actionSelector:setOnChange(function(index) uiModel:setDeleteOption(index) end)
+    self.timer = nil
+    self.deletePos = 0
+    self.deleteQueue = nil
     if lcd.RGB ~= nil then
         local w
         w, textHeight = lcd.sizeText("Hg")
@@ -66,16 +72,31 @@ function BwUi:updateUi()
     lcd.drawText(LEFT, y, "LogManager", INVERS)
     lcd.drawText(LCD_W - #VERSION_STRING * 4, y, VERSION_STRING, SMLSIZE)
 
-    y = newLine(y)
-    lcd.drawText(LEFT, y,
-        string.format("%d Log%s for %d Model%s", totalFileCount, s(totalFileCount), modelCount, s(modelCount)))
-
-    y = newLine(y, 1.5)
-    if self.state == STATE.REPORT then
-        lcd.drawText(LEFT, y, string.format("Purged %d file%s", self.deletedFiles, s(self.deletedFiles)))
+    if self.state == STATE.EXECUTING then
+        y = newLine(y, 1.5)
+        lcd.drawText(LEFT, y, string.format("Deleting %d/%d", self.deletePos, #self.deleteQueue))
         y = newLine(y)
+        local logFile = self.deleteQueue[self.deletePos]
+        lcd.drawText(LEFT, y, logFile:getModelName())
+        y = newLine(y)
+        lcd.drawText(LEFT, y, string.format("%s-%s", logFile:getDate(), logFile:getTime()))
+        y = newLine(y)
+        lcd.drawText(LEFT, y, string.format("Size: %d Byte%s", logFile:getSize(), s(logFile:getSize())))
+        y = newLine(y)
+        lcd.drawGauge(1, y, LCD_W - 2, textHeight, self.deletePos, #self.deleteQueue)
+    elseif self.state == STATE.REPORT then
+        y = newLine(y, 1.5)
+        lcd.drawText(LEFT, y, string.format("Deleted %d file%s", self.deletedFiles, s(self.deletedFiles)))
+        y = newLine(y)
+        lcd.drawText(LEFT, y, string.format("Freed up %d Byte%s", self.deletedBytes, s(self.deletedBytes)))
+        y = newLine(y, 2)
         lcd.drawText(LEFT, y, "Press RTN")
     else
+        y = newLine(y)
+        lcd.drawText(LEFT, y,
+            string.format("%d Log%s for %d Model%s", totalFileCount, s(totalFileCount), modelCount, s(modelCount)))
+        y = newLine(y, 1.5)
+
         -- Model Selector
         lcd.drawText(LEFT, y, "Model:")
         lcd.drawText(6 * textWidth, y, self.modelSelector:getValue(), self.modelSelector:getFlags())
@@ -110,11 +131,20 @@ function BwUi:updateUi()
     end
 end
 
+function BwUi:prepareDelete()
+    self.deleteQueue = self:getFilesToDelete()
+    self.deletePos = 1
+    self.deletedFiles = 0
+    self.deletedBytes = 0
+    self.timer = getTime()
+    return #self.deleteQueue > 0
+end
+
 function BwUi:handleIdle(event)
     if event == EVT_VIRTUAL_NEXT then
         self.modelSelector:setState(Selector.STATE.SELECTED)
         self.state = STATE.CHOICE_MODEL_SELECTED
-    elseif event == EVT_VIRTUAL_ENTER_LONG and #self:getFilesToDelete() > 0 then
+    elseif event == EVT_VIRTUAL_ENTER_LONG and self:prepareDelete() then
         self.state = STATE.EXECUTING
     end
     self:updateUi()
@@ -129,9 +159,11 @@ function BwUi:handleChoiceModelSelected(event)
         self.modelSelector:setState(Selector.STATE.IDLE)
         self.actionSelector:setState(Selector.STATE.SELECTED)
         self.state = STATE.CHOICE_ACTION_SELECTED
-    elseif event == EVT_VIRTUAL_ENTER_LONG and #self:getFilesToDelete() > 0 then
+    elseif event == EVT_VIRTUAL_ENTER_LONG and self:prepareDelete() then
         self.modelSelector:setState(Selector.STATE.IDLE)
         self.state = STATE.EXECUTING
+    elseif event == EVT_VIRTUAL_NEXT_PAGE then
+        self:updateBrowser()
     end
     self:updateUi()
     return 0
@@ -158,7 +190,7 @@ function BwUi:handleChoiceActionSelected(event)
         self.actionSelector:setState(Selector.STATE.IDLE)
         self.modelSelector:setState(Selector.STATE.SELECTED)
         self.state = STATE.CHOICE_MODEL_SELECTED
-    elseif event == EVT_VIRTUAL_ENTER_LONG then
+    elseif event == EVT_VIRTUAL_ENTER_LONG and self:prepareDelete() then
         self.actionSelector:setState(Selector.STATE.IDLE)
         self.state = STATE.EXECUTING
     end
@@ -227,10 +259,22 @@ function BwUi:deleteLogs(model, action)
 end
 
 function BwUi:handleExecuting(event)
-    self:deleteLogs()
-    self.logFiles:read()
-    self.uiModel:update(self.logFiles)
-    self.state = STATE.REPORT
+    if self.deletePos <= #self.deleteQueue then
+        self:updateUi()
+        local currentTime = getTime()
+        if currentTime - self.timer > DISPLAY_DELAY then
+            local logFile = self.deleteQueue[self.deletePos]
+            logFile:delete()
+            self.timer = currentTime
+            self.deletedFiles = self.deletedFiles + 1
+            self.deletedBytes = self.deletedBytes + logFile:getSize()
+            self.deletePos = self.deletePos + 1
+        end
+    else -- all requested files deleted
+        self.logFiles:read()
+        self.uiModel:update(self.logFiles)
+        self.state = STATE.REPORT
+    end
     return 0
 end
 

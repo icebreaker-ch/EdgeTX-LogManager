@@ -4,8 +4,9 @@ LogFile.__index = LogFile
 -- pattern modelName, date, time
 LogFile.pattern = "(.*)%-(%d%d%d%d%-%d%d%-%d%d)%-(%d%d%d%d%d%d)%.csv$"
 
-function LogFile.new(fileName, info)
+function LogFile.new(path, fileName, info)
     local self = setmetatable({}, LogFile)
+    self.path = path
     self.fileName = fileName
     self.info = info
     self.modelName, self.date, self.time = string.match(fileName, self.pattern)
@@ -28,8 +29,16 @@ function LogFile:getDate()
     return self.date
 end
 
+function LogFile:getTime()
+    return self.time
+end
+
 function LogFile:getSize()
     return self.info.size
+end
+
+function LogFile:delete()
+    del(self.path .. "/" .. self.fileName)
 end
 
 return LogFile
