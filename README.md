@@ -5,6 +5,8 @@ Actions can be performed on all models or a selected model.
 Since the color version is using the LVGL widgets API, EdgeTX version 2.11 or later is needed to run. However,
 the b/w version can be used on color radios with older versions of EdgeTX.
 
+If you wish to have a more detailed control of LOG-File management, you may want to have a look at my [LogFM Project](https://github.com/icebreaker-ch/EdgeTX-LogFM) (the Log File Manager for EdgeTX)
+
 ![start](https://github.com/user-attachments/assets/ab624f43-ed1d-4521-943b-24e5f55ae9ab)
 
 ![screenshot_zorro_25-05-28_08-47-48](https://github.com/user-attachments/assets/27e2f7e3-b8c9-473e-9a59-14fe888ec615) ![screenshot_zorro_25-05-28_08-48-42](https://github.com/user-attachments/assets/59cdf50a-f4c0-48cb-a38b-a9db05439ee6)
